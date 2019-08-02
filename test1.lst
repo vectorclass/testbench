@@ -1,0 +1,306 @@
+# Test data for VCL test bench
+# This list contains test cases for general functions and operators
+# Use:
+# ./runtest.sh test1.lst
+
+# choose compiler:
+$compiler=1
+$mode=64
+
+# path to testbench program
+$testbench=testbench1.cpp
+
+# path to vectorclass.h include files
+$include=./
+
+# output file
+$outfile=test1.txt
+
+# random number seed
+$seed=1
+
+# Each line contains the following parameters, separated by commas:
+# test case, vector type, return type, instruction set
+
+# signed integer types
+1 2 3 8 9 10 13 14 15 16 , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q , , 2 5 8 9 10
+
+# unsigned integer types
+1 2 3 9 10 14 15 16 , Vec16uc Vec32uc Vec64uc Vec8us Vec16us Vec32us Vec4ui Vec8ui Vec16ui Vec2uq Vec4uq Vec8uq , , 3 6 8 9 10
+
+# integer division
+5 6 7 , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec16uc Vec32uc Vec64uc Vec8us Vec16us Vec32us Vec4ui Vec8ui Vec16ui , , 4 9 10
+
+# signed integer division with different compile-time constant divisors
+6 , Vec16c Vec16s Vec4i Vec8i Vec16i , , 10 , x , 1
+6 , Vec16c Vec16s Vec4i Vec8i Vec16i , , 10 , x , 2
+6 , Vec16c Vec16s Vec4i Vec8i Vec16i , , 10 , x , 3
+6 , Vec16c Vec16s Vec4i Vec8i Vec16i , , 10 , x , 5
+6 , Vec16c Vec16s Vec4i Vec8i Vec16i , , 10 , x , 7
+6 , Vec16c Vec16s Vec4i Vec8i Vec16i , , 10 , x , 18
+6 , Vec16c Vec16s Vec4i Vec8i Vec16i , , 10 , x , 100
+7 , Vec16uc Vec16us Vec4ui Vec8ui Vec16ui , , 10 , x , 128
+
+# unsigned integer division with different compile-time constant divisors
+7 , Vec16uc Vec16us Vec4ui Vec8ui Vec16ui , , 10 , x , 1
+7 , Vec16uc Vec16us Vec4ui Vec8ui Vec16ui , , 10 , x , 2
+7 , Vec16uc Vec16us Vec4ui Vec8ui Vec16ui , , 10 , x , 3
+7 , Vec16uc Vec16us Vec4ui Vec8ui Vec16ui , , 10 , x , 5
+7 , Vec16uc Vec16us Vec4ui Vec8ui Vec16ui , , 10 , x , 7
+7 , Vec16uc Vec16us Vec4ui Vec8ui Vec16ui , , 10 , x , 10
+7 , Vec16uc Vec16us Vec4ui Vec8ui Vec16ui , , 10 , x , 21
+7 , Vec16uc Vec16us Vec4ui Vec8ui Vec16ui , , 10 , x , 100
+7 , Vec16uc Vec16us Vec4ui Vec8ui Vec16ui , , 10 , x , 128
+
+# bit operations on signed integer vectors
+100 101 102 106 107 108 109 , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i , , 4 9 10
+
+# bit operations on unsigned integer vectors
+100 101 106 107 108 109 , Vec16uc Vec32uc Vec64uc Vec8us Vec16us Vec32us Vec4ui Vec8ui Vec16ui , , 5 9 10
+
+# saturated operations
+103 104 , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec16uc Vec32uc Vec64uc Vec8us Vec16us Vec32us Vec4ui Vec8ui Vec16ui  , , 6 9 10
+105 , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q  , , 8 9 10
+
+# floating point types
+1 2 3 4 8 9 10 11 12 13 14 15 16 17 200 201 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 9 10
+
+# boolean result types
+300 301 302 303 304 305 306 , Vec2d , Vec2db           , 3 8 9 10
+300 301 302 303 304 305     , Vec2q Vec2uq , Vec2qb    , 3 8 9 10
+300 301 302 303 304 305 306 , Vec4d , Vec4db           , 3 8 9 10
+300 301 302 303 304 305     , Vec4q Vec4uq , Vec4qb    , 3 8 9 10
+300 301 302 303 304 305 306 , Vec8d , Vec8db           , 4 5 6 7 9 10
+300 301 302 303 304 305     , Vec8q Vec8uq , Vec8qb    , 4 5 6 7 9 10
+300 301 302 303 304 305 306 , Vec4f , Vec4fb           , 4 7 9 10
+300 301 302 303 304 305     , Vec4i Vec4ui , Vec4ib    , 4 7 9 10
+300 301 302 303 304 305 306 , Vec8f , Vec8fb           , 4 7 9 10
+300 301 302 303 304 305     , Vec8i Vec8ui , Vec8ib    , 4 7 9 10
+300 301 302 303 304 305 306 , Vec16f , Vec16fb         , 4 7 9 10
+300 301 302 303 304 305     , Vec16i Vec16ui , Vec16ib , 4 7 9 10
+300 301 302 303 304 305     , Vec8s Vec8us   , Vec8sb  , 5 8 9 10
+300 301 302 303 304 305     , Vec16s Vec16us , Vec16sb , 5 8 9 10
+300 301 302 303 304 305     , Vec32s Vec32us , Vec32sb , 5 8 9 10
+300 301 302 303 304 305     , Vec16c Vec16uc , Vec16cb , 2 8 9 10
+300 301 302 303 304 305     , Vec32c Vec32uc , Vec32cb , 2 8 9 10
+300 301 302 303 304 305     , Vec64c Vec64uc , Vec64cb , 2 8 9 10
+
+# Horizontal functions (result type is specified as a vector, even if it is a scalar)
+
+# horizontal_add
+400 ,  Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec16uc Vec32uc Vec64uc Vec8us Vec16us Vec32us Vec4ui Vec8ui Vec16ui Vec2q Vec4q Vec8q Vec2uq Vec4uq Vec8uq, , 3 4 8 9 10
+400 ,  Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d, , 3 8 9 10
+
+# horizontal_add_x
+401 ,  Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec16uc Vec32uc Vec64uc Vec8us Vec16us Vec32us Vec4ui Vec8ui Vec16ui, , 3 4 8 9 10
+# horizontal_and horizontal_or
+402 403 , Vec16cb Vec32cb Vec32cb Vec8sb Vec16sb Vec32sb Vec4ib Vec8ib Vec16ib Vec2qb Vec4qb Vec8qb Vec4fb Vec8fb Vec16fb Vec2db Vec4db Vec8db, , 3 5 7 9 10
+
+# horizontal_find_first horizontal_count
+410 411 , Vec16cb Vec32cb Vec64cb Vec8sb Vec16sb Vec32sb Vec4ib Vec8ib Vec16ib Vec2qb Vec4qb Vec8qb Vec4fb Vec8fb Vec16fb Vec2db Vec4db Vec8db, Vec4i , 3 8 9 10
+
+# to_bits  load_bits
+412 , Vec16cb Vec32cb Vec64cb Vec8sb Vec16sb Vec32sb Vec4ib Vec8ib Vec16ib Vec2qb Vec4qb Vec8qb Vec4fb Vec8fb Vec16fb Vec2db Vec4db Vec8db, Vec2uq , 4 7 9 10
+413 , Vec16cb Vec32cb Vec64cb Vec8sb Vec16sb Vec32sb Vec4ib Vec8ib Vec16ib Vec2qb Vec4qb Vec8qb Vec4fb Vec8fb Vec16fb Vec2db Vec4db Vec8db, , 4 7 9 10
+
+# conversion between vector types
+500 , Vec16c Vec16uc Vec8s Vec8us Vec4i Vec4ui Vec2q Vec2uq     , Vec16c  , 2 8 9 10
+500 , Vec32c Vec32uc Vec16s Vec16us Vec8i Vec8ui Vec4q Vec4uq   , Vec4q   , 3 8 9 10
+500 , Vec64c Vec64uc Vec32s Vec32us Vec16i Vec16ui Vec8q Vec8uq , Vec32us , 3 8 9 10
+501 , Vec4ib , Vec4fb , 2
+501 , Vec4db , Vec4qb , 8
+501 , Vec16ib , Vec16fb , 10
+501 , Vec8db , Vec8qb , 10
+502 , Vec4f Vec2d , Vec4i , 4
+502 , Vec8f Vec4d , Vec8i , 4
+502 , Vec16f Vec8d , Vec16i , 4 7 9 10
+502 , Vec16f Vec8d , Vec8uq , 4 7 9 10
+503 , Vec16c Vec8us  Vec4i  Vec2q , Vec4f , 2 7 9 10
+503 , Vec32c Vec16us Vec8i  Vec4q , Vec8f , 3 7 9 10
+503 , Vec64c Vec32us Vec16i Vec8q , Vec16f, 4 7 9 10
+504 , Vec16c Vec8us  Vec4i  Vec2q , Vec2d , 5 7 9 10
+504 , Vec32c Vec16us Vec8i  Vec4q , Vec4d , 6 7 9 10
+504 , Vec64c Vec32us Vec16i Vec8q , Vec8d , 2 6 7 9 10
+
+# roundi truncatei
+505 506 , Vec4f  , Vec4i  , 4 9 10
+505 506 , Vec8f  , Vec8i  , 4 9 10
+505 506 , Vec16f , Vec16i , 4 9 10
+505 506 , Vec2d  , Vec2q  , 4 9 10
+505 506 , Vec4d  , Vec4q  , 4 9 10
+505 506 , Vec8d  , Vec8q  , 4 9 10
+
+# round_to_int32 truncate_to_int32
+507 508 ,  Vec2d Vec4d , Vec4i  , 4 9 10
+507 508 ,  Vec8d , Vec8i  , 4 9 10
+509 510 ,  Vec2d , Vec4i  , 4 9 10
+
+# to_float, to_double, etc.
+511 , Vec4i  Vec4ui  , Vec4f  , 4 9 10
+511 , Vec8i  Vec8ui  , Vec8f  , 4 9 10
+511 , Vec16i Vec16ui , Vec16f , 4 9 10
+512 , Vec2q Vec2uq , Vec2d , 4 9 10
+512 , Vec4i Vec4q Vec4uq , Vec4d , 4 9 10
+512 , Vec8q Vec8uq , Vec8d , 4 9 10
+513 , Vec2d , Vec4f , 2 7
+513 , Vec4d , Vec4f , 3 7 8
+513 , Vec8d , Vec8f , 4 7 8 9 10
+514 , Vec4f , Vec4d , 5 7 8 10
+514 , Vec8f , Vec8d , 5 7 8 10
+
+# concatenate vectors
+600 , Vec16c , Vec32c  , 2 4 8 10
+600 , Vec32c , Vec64c  , 2 4 8 10
+600 , Vec8us , Vec16us , 2 4 8 10
+600 , Vec16s , Vec32s  , 2 4 8 10
+600 , Vec4i  , Vec8i   , 2 4 8 10
+600 , Vec8ui , Vec16ui , 2 4 8 10
+600 , Vec2q  , Vec4q   , 2 4 8 10
+600 , Vec4q  , Vec8q   , 2 4 8 10
+600 , Vec4f  , Vec8f   , 2 4 8 10
+600 , Vec8f  , Vec16f  , 2 4 8 10
+600 , Vec2d  , Vec4d   , 2 4 8 10
+600 , Vec4d  , Vec8d   , 2 4 8 10
+601 , Vec16cb, Vec32cb , 4 8 9 10
+601 , Vec32cb, Vec64cb , 4 8 9 10
+601 , Vec8sb , Vec16sb , 4 8 9 10
+601 , Vec16sb, Vec32sb , 4 8 9 10
+601 , Vec4ib , Vec8ib  , 4 8 9 10
+601 , Vec8ib , Vec16ib , 4 8 9 10
+601 , Vec2qb , Vec4qb  , 4 8 9 10
+601 , Vec4qb , Vec8qb  , 4 8 9 10
+601 , Vec4fb , Vec8fb  , 4 8 9 10
+601 , Vec8fb , Vec16fb , 4 8 9 10
+601 , Vec2db , Vec4db  , 4 8 9 10
+601 , Vec4db , Vec8db  , 4 8 9 10
+
+# get_low, get_high
+602 603 , Vec32c , Vec16c , 2 4 8 10
+602 603 , Vec64c , Vec32c , 2 4 8 10
+602 603 , Vec16us, Vec8us , 2 4 8 10
+602 603 , Vec32s , Vec16s , 2 4 8 10
+602 603 , Vec8i  , Vec4i  , 2 4 8 10
+602 603 , Vec16ui, Vec8ui , 2 4 8 10
+602 603 , Vec4q  , Vec2q  , 2 4 8 10
+602 603 , Vec8q  , Vec4q  , 2 4 8 10
+602 603 , Vec8f  , Vec4f  , 2 4 8 10
+602 603 , Vec16f , Vec8f  , 2 4 8 10
+602 603 , Vec4d  , Vec2d  , 2 4 8 10
+602 603 , Vec8d  , Vec4d  , 2 4 8 10
+604 605 , Vec32cb , Vec16cb , 4 8 9 10
+604 605 , Vec64cb , Vec32cb , 4 8 9 10
+604 605 , Vec16sb , Vec8sb  , 4 8 9 10
+604 605 , Vec32sb , Vec16sb , 4 8 9 10
+604 605 , Vec8ib  , Vec4ib  , 4 8 9 10
+604 605 , Vec16ib , Vec8ib  , 4 8 9 10
+604 605 , Vec4qb  , Vec2qb  , 4 8 9 10
+604 605 , Vec8qb  , Vec4qb  , 4 8 9 10
+604 605 , Vec8fb  , Vec4fb  , 4 8 9 10
+604 605 , Vec16fb , Vec8fb  , 4 8 9 10
+604 605 , Vec4db  , Vec2db  , 4 8 9 10
+604 605 , Vec8db  , Vec4db  , 4 8 9 10
+
+# extend (double vector size)
+606 , Vec16c  , Vec16s  , 3 7 8 9 10
+606 , Vec16uc , Vec16us , 4 8
+606 , Vec8s   , Vec8i   , 2 8 9 10
+606 , Vec8us  , Vec8ui  , 5 7 8 9
+606 , Vec4i   , Vec4q   , 3 8 10
+606 , Vec4ui  , Vec4uq  , 3 8 10
+606 , Vec32c  , Vec32s  , 3 8 9 10
+606 , Vec32uc , Vec32us , 8 10
+606 , Vec16s  , Vec16i  , 3 8 10
+606 , Vec16us , Vec16ui , 4 9 10
+606 , Vec8i   , Vec8q   , 5 9 10
+606 , Vec8ui  , Vec8uq  , 6 8 10
+
+# extend_low, extend_high
+607 608 , Vec16c , Vec8s  , 2 6 8 9 10
+607 608 , Vec32c , Vec16s , 4 9 10
+607 608 , Vec64c , Vec32s , 4 9 10
+607 608 , Vec8s  , Vec4i  , 4 9 10
+607 608 , Vec16s , Vec8i  , 4 9 10
+607 608 , Vec32s , Vec16i , 4 9 10
+607 608 , Vec4i  , Vec2q  , 4 9 10
+607 608 , Vec8i  , Vec4q  , 4 9 10
+607 608 , Vec16i , Vec8q  , 4 9 10
+607 608 , Vec16uc , Vec8us  , 3 7 8 9 10
+607 608 , Vec32uc , Vec16us , 4 9 10
+607 608 , Vec64uc , Vec32us , 4 9 10
+607 608 , Vec8us  , Vec4ui  , 4 9 10
+607 608 , Vec16us , Vec8ui  , 4 9 10
+607 608 , Vec32us , Vec16ui , 4 9 10
+607 608 , Vec4ui  , Vec2uq  , 4 9 10
+607 608 , Vec8ui  , Vec4uq  , 4 9 10
+607 608 , Vec16ui , Vec8uq  , 4 9 10
+607 608 , Vec4f  , Vec2d  , 4 9 10
+607 608 , Vec8f  , Vec4d  , 4 9 10
+607 608 , Vec16f , Vec8d  , 4 9 10
+
+# compress. reduce vector size
+609 , Vec16s  , Vec16c  , 3 7 8 9 10
+609 , Vec16us , Vec16uc , 4 8
+609 , Vec8i   , Vec8s   , 3 8 9 10
+609 , Vec8ui  , Vec8us  , 4 7 8 9
+609 , Vec4q   , Vec4i   , 3 8 10
+609 , Vec4uq  , Vec4ui  , 3 8 10
+609 , Vec32s  , Vec32c  , 3 8 9 10
+609 , Vec32us , Vec32uc , 8 10
+609 , Vec16i  , Vec16s  , 3 8 10
+609 , Vec16ui , Vec16us , 4 9 10
+609 , Vec8q   , Vec8i   , 5 9 10
+609 , Vec8uq  , Vec8ui  , 6 8 10
+
+# compress with two parameters
+610 611  , Vec8s,   Vec16c  , 2 6 8 9 10
+610 611  , Vec16s,  Vec32c  , 4 9 10
+610 611  , Vec32s,  Vec64c  , 4 9 10
+610 611  , Vec4i,   Vec8s   , 4 9 10
+610 611  , Vec8i,   Vec16s  , 4 9 10
+610 611  , Vec16i,  Vec32s  , 4 9 10
+610 611  , Vec2q ,  Vec4i   , 4 9 10
+610 611  , Vec4q,   Vec8i   , 4 9 10
+610 611  , Vec8q,   Vec16i  , 4 9 10
+610 611  , Vec8us,  Vec16uc , 3 7 8 9 10
+610 611  , Vec16us, Vec32uc , 4 9 10
+610 611  , Vec32us, Vec64uc , 4 9 10
+610 611  , Vec4ui,  Vec8us  , 4 9 10
+610 611  , Vec8ui,  Vec16us , 4 9 10
+610 611  , Vec16ui, Vec32us , 4 9 10
+610 611  , Vec2uq,  Vec4ui  , 4 9 10
+610 611  , Vec4uq,  Vec8ui  , 4 9 10
+610 611  , Vec8uq,  Vec16ui , 4 9 10
+610      , Vec2d,   Vec4f   , 4 9 10
+610      , Vec4d,   Vec8f   , 4 9 10
+610      , Vec8d,   Vec16f  , 4 9 10
+
+# insert
+612      , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q ,, 2 6 8 10
+612      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d ,, 2 6 8 10
+
+# extract
+613      , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q ,, 2 6 8 10
+613      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d ,, 2 6 8 10
+
+# cutoff
+614      , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q ,, 2 6 8 10
+614      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d ,, 2 6 8 10
+
+# load_partial
+615      , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q ,, 2 6 8 10
+615      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d ,, 2 6 8 10
+
+# store_partial
+616      , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q ,, 2 6 8 10
+616      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d ,, 2 6 8 10
+
+
+###########################
+# Only in VCL version 2:
+###########################
+
+# constructor with all elements
+650 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec16uc Vec32uc Vec64uc Vec8us Vec16us Vec32us Vec4ui Vec8ui Vec16ui Vec2q Vec4q Vec8q Vec2uq Vec4uq Vec8uq ,, 2 8 10
+
+# horizontal_min, horizontal_max
+404 405 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec16uc Vec32uc Vec64uc Vec8us Vec16us Vec32us Vec4ui Vec8ui Vec16ui Vec2q Vec4q Vec8q Vec2uq Vec4uq Vec8uq ,, 2 8 10

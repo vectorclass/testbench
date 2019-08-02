@@ -1,0 +1,94 @@
+# Test data for VCL test bench
+# This list contains test cases for mathematical functions
+# Use:
+# ./runtest.sh test3.lst
+
+# choose compiler:
+$compiler=1
+$mode=64
+
+# path to testbench program
+$testbench=testbench3.cpp
+
+# path to vectorclass.h include files
+$include=./
+
+# output file
+$outfile=test3.txt
+
+# random number seed
+$seed=1
+
+
+# Each line contains the following parameters, separated by commas:
+# test case, vector type, return type, instruction set, function name, indexes
+
+1 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10 ,  # round
+2 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10 ,  # truncate
+3 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10 ,  # floor
+4 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10 ,  # ceil
+5 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10 ,  # square
+6 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10 ,  # sqrt
+7 , Vec4f Vec8f Vec16f , , 2 7 8 10 ,  # approx_recipr
+8 , Vec4f Vec8f Vec16f , , 2 7 8 10 ,  # approx_rsqrt
+
+9 , Vec4f  , Vec4i  , 2 7 8 10 ,  # exponent
+9 , Vec8f  , Vec8i  , 2 7 8 10 ,  # exponent
+9 , Vec16f , Vec16i , 2 7 8 10 ,  # exponent
+9 , Vec2d  , Vec2q  , 2 7 8 10 ,  # exponent
+9 , Vec4d  , Vec4q  , 2 7 8 10 ,  # exponent
+9 , Vec8d  , Vec8q  , 2 7 8 10 ,  # exponent
+
+10 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10 , # fraction
+11 , Vec4i , Vec4f  , 2 7 8 10 ,      # exp2 (integer)
+11 , Vec8i , Vec8f  , 2 7 8 10 ,      # exp2 (integer)
+11 , Vec16i, Vec16f , 2 7 8 10 ,      # exp2 (integer)
+11 , Vec2q , Vec2d  , 2 7 8 10 ,      # exp2 (integer)
+11 , Vec4q , Vec4d  , 2 7 8 10 ,      # exp2 (integer)
+11 , Vec8q , Vec8d  , 2 7 8 10 ,      # exp2 (integer)
+12 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10 ,   # mul_add
+13 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10 ,   # mul_sub_x
+
+# is_finite, is_inf, is_nan, is_subnormal, is_zero_or_subnormal
+20 21 22 23 24 , Vec4f  , Vec4fb  , 2 7 8 10 ,  ,
+20 21 22 23 24 , Vec8f  , Vec8fb  , 2 7 8 10 ,  ,
+20 21 22 23 24 , Vec16f , Vec16fb , 2 7 8 10 ,  ,
+20 21 22 23 24 , Vec2d  , Vec2db  , 2 7 8 10 ,  ,
+20 21 22 23 24 , Vec4d  , Vec4db  , 2 7 8 10 ,  ,
+20 21 22 23 24 , Vec8d  , Vec8db  , 2 7 8 10 ,  ,
+
+100 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # exp
+101 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # expm1
+102 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # exp2
+103 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # exp10
+104 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # log
+105 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # log1p
+106 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # log2
+107 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # log10
+108 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # cbrt
+
+# not in vectormat_lib.h version:
+109 110 111 112 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10  # pow_ratio
+115 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # pow_const(vector, const int)
+
+200 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # sin
+201 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # cos
+
+# not in vectormat_lib.h version with MS compiler:
+202 203 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10   # sincos
+
+204 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # tan
+205 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # asin
+206 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # acos
+207 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # atan
+
+300 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # sinh
+301 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # cosh
+302 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # tanh
+303 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # asinh
+304 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # acosh
+305 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # atanh
+
+500 501 502 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10  # pow
+510 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # atan2
+511 512 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10   # maximum, minimum

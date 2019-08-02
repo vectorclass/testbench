@@ -1,0 +1,470 @@
+# Test data for VCL test bench
+# This list contains test cases for permute, blend, lookup, gather, and scatter functions, etc.
+# Use:
+# ./runtest.sh test2.lst
+
+# choose compiler:
+$compiler=1
+$mode=64
+
+# path to testbench program
+$testbench=testbench2.cpp
+
+# path to vectorclass.h include files
+$include=./
+
+# output file
+$outfile=test2.txt
+
+# random number seed
+$seed=1
+
+
+# Each line contains the following parameters, separated by commas:
+# test case, vector type, return type, instruction set, function name, indexes
+
+# permute functions
+# =================
+
+# permute2: all possible combinations
+1 , Vec2q Vec2d , , 2 4 , permute2 , 0+0
+1 , Vec2q Vec2d , , 2 5 , permute2 , 0+1
+1 , Vec2q Vec2d , , 2 6 , permute2 , 0+-1
+1 , Vec2q Vec2uq Vec2d , , 2 7 , permute2 , 1+0
+1 , Vec2q Vec2d , , 2 8 , permute2 , 1+1
+1 , Vec2q Vec2d , , 2 9 , permute2 , 1+-1
+1 , Vec2q Vec2d , , 2 10 , permute2 , -1+0
+1 , Vec2q Vec2d , , 2 10 , permute2 , -1+1
+1 , Vec2q Vec2d , , 2 10 , permute2 , -1+-1
+
+# permute4: test all branches
+1 , Vec4i Vec4f Vec4q Vec4d , , 2 7 10 , permute4 , 0+1+2+3         , # no permute
+1 , Vec4i Vec4f Vec4q Vec4d , , 2 7 10 , permute4 , -1+-1+V_DC+V_DC , # all zero
+1 , Vec4i Vec4f Vec4q Vec4d , , 2 7 10 , permute4 , 2+3+-1+1        , # bigger block permutation
+1 , Vec4i Vec4f             , , 2 7 10 , permute4 , 0+0+1+1         , # punpckldq
+1 , Vec4i Vec4f             , , 2 7 10 , permute4 , 2+2+3+3         , # punpckhdq
+1 , Vec4q Vec4d             , , 2 7 10 , permute4 , 0+0+2+2         , # punpcklqdq 
+1 , Vec4q Vec4d             , , 2 7 10 , permute4 , 1+1+3+3         , # punpckhqdq 
+1 , Vec4i Vec4f             , , 2 7 10 , permute4 , -1+0+1+2        , # pslldq
+1 , Vec4i Vec4f             , , 2 7 10 , permute4 , 1+2+3+-1        , # psrldq
+1 , Vec4i Vec4f Vec4q Vec4d , , 2 7 10 , permute4 , 1+2+3+0         , # rotate
+1 , Vec4i Vec4f Vec4q Vec4d , , 2 7 10 , permute4 , 0+1+-1+-1       , # zero extend
+1 , Vec4i Vec4f Vec4q Vec4d , , 2 7 10 , permute4 , 2+3+-1+-1       , # zero extend high part
+1 , Vec4i Vec4f Vec4q Vec4d , , 2 7 10 , permute4 , 0+0+0+0         , # broadcast
+1 , Vec4i Vec4f Vec4q Vec4d , , 2 7 10 , permute4 , 3+0+2+2         , # random
+1 , Vec4i Vec4f Vec4q Vec4d , , 2 7 10 , permute4 , 1+3+-1+3        , # random
+1 , Vec4i Vec4f Vec4q Vec4d , , 2 7 10 , permute4 , 0+V_DC+V_DC+1   , # random
+
+# permute8
+1 , Vec8s Vec8i Vec8q Vec8f Vec8d , , 2 7 8 10 , permute8 , 0+1+2+3+4+5+6+7  , # no permute
+1 , Vec8s Vec8i Vec8q Vec8f Vec8d , , 2 4 10 , permute8 , 0+1+2+3+4+-1+6+7   , # no permute, zero
+1 , Vec8s Vec8i Vec8q Vec8f Vec8d , , 2 4 10 , permute8 , 5+6+7+0+1+2+3+4    , # rotate
+1 , Vec8s Vec8i Vec8q Vec8f Vec8d , , 2 4 10 , permute8 , 4+5+2+3+0+1+6+7    , # bigger block permutation
+1 , Vec8s Vec8i Vec8q Vec8f Vec8d , , 2 4 10 , permute8 , 0+0+0+0+0+0+0+0    , # broadcast
+1 , Vec8s Vec8i Vec8q Vec8f Vec8d , , 2 4 10 , permute8 , 1+1+1+1+1+1+1+1    , # broadcast
+1 , Vec8s Vec8i Vec8q Vec8f Vec8d , , 2 4 10 , permute8 , 3+0+2+1 + 4+5+6+7  , # 16 bit permute low
+1 , Vec8s Vec8i Vec8q Vec8f Vec8d , , 2 4 10 , permute8 , 0+1+2+3 + 6+7+5+4  , # 16 bit permute high
+1 , Vec8s Vec8i Vec8q Vec8f Vec8d , , 2 4 10 , permute8 , 0+3+2+2 + 4+7+5+4  , # 16 bit permute low and high
+1 , Vec8s                         , , 2 4 10 , permute8 , 0+0+1+1+2+2+3+3    , # unpckl
+1 , Vec8s                         , , 2 4 10 , permute8 , 4+4+5+5+6+6+7+7    , # unpckh
+1 , Vec8s Vec8i                   , , 2 4 10 , permute8 , 3+4+5+6+7+-1+-1+-1 , # shift left
+1 , Vec8s Vec8i                   , , 2 4 10 , permute8 , -1+0+1+2+3+4+5+6   , # shift right
+1 , Vec8s Vec8i Vec8q Vec8f Vec8d , , 2 4 7 8 10 , permute8 , 7+0+1+2+3+4+5+6  , # rotate
+1 ,       Vec8i       Vec8f       , , 2 4 10 , permute8 , 0+0+1+1+4+4+5+5    , # unpckl
+1 ,       Vec8i       Vec8f Vec8d , , 2 4 10 , permute8 , 2+2+3+3+6+6+7+-1   , # unpckh
+1 ,       Vec8i Vec8q Vec8f       , , 2 4 10 , permute8 , 2+2+0+3+6+6+4+7    , # same pattern in two 128-bit lanes
+1 ,       Vec8i Vec8q Vec8f       , , 2 4 10 , permute8 , 2+2+0+3+5+6+-1+7   , # no crossing two 128-bit lanes
+1 ,       Vec8i       Vec8f       , ,   9 10 , permute8 , 0+-1+1+-1+2+-1+3+-1  , # zero extension
+1 ,       Vec8i       Vec8f       , ,   9 10 , permute8 , 0+-1+1+-1+2+-1+-1+-1 , # zero extension + zeroing
+1 , Vec8s Vec8i       Vec8f       , ,   9 10 , permute8 , 1+2+5+6+-1+-1+-1+-1  , # compression
+1 , Vec8s Vec8i       Vec8f       , ,   9 10 , permute8 , 0+2+-1+5+6+-1+-1+-1  , # compression + zeroing
+1 , Vec8s Vec8i       Vec8f       , ,   9 10 , permute8 , -1+0+1+-1+2+-1+3+4   , # expansion
+1 , Vec8s Vec8i       Vec8f       , ,   9 10 , permute8 , -1+1+-1+2+-1+4+-1+5  , # expansion + zeroing
+1 , Vec8s Vec8i Vec8q Vec8f Vec8d , , 2 4 7 8 10 , permute8 , 6+3+7+5+1+0+3+4, # random
+1 , Vec8us Vec8ui Vec8uq Vec8f Vec8d , , 2 4 10 , permute8 , -1+5+1+0+7+5+3+4, # random, unsigned
+1 ,             Vec8q       Vec8d , , 2 4 10 , permute8 , 1+0+3+2+5+4+7+6    , # same pattern in four 128-bit lanes
+1 ,             Vec8q       Vec8d , , 2 4 10 , permute8 , 1+0+2+2+5+5+6+7    , # no crossing four 128-bit lanes
+1 ,             Vec8q       Vec8d , , 2 4 10 , permute8 , 0+0+2+2+4+4+6+6    , # unpckl
+1 ,             Vec8q       Vec8d , , 2 4 10 , permute8 , 1+1+3+3+5+5+7+7    , # unpckh
+
+# permute16
+1 , Vec16c Vec16s Vec16i Vec16f , , 2 4 10 , permute16 , 0+1+2+3+4+5+6+7+8+9+10+11+12+13+14+15       , # no permute  
+1 , Vec16c Vec16s Vec16i Vec16f , , 2 4 10 , permute16 , 0+1+2+3+4+5+6+7+8+9+10+11+12+-1+-1+15       , # no permute, zero
+1 , Vec16c                      , , 2 4 10 , permute16 , 0+0+1+1+2+2+3+3+4+4+5+5+6+6+7+7             , # punpcklbw
+1 , Vec16c                      , , 2 4 10 , permute16 , 8+8+9+9+10+10+11+11+12+12+13+13+14+14+15+15 , # punpckhbw
+1 , Vec16c Vec16s Vec16i Vec16f , , 2 4 10 , permute16 , -1+-1+-1+0+1+2+3+4+5+6+7+8+9+10+11+12       , # shift right
+1 , Vec16c Vec16s Vec16i Vec16f , , 2 4 10 , permute16 , 6+7+8+9+10+11+12+13+14+15+-1+-1+-1+-1+-1+-1 , # shift left
+1 , Vec16c Vec16s Vec16i Vec16f , , 2 4 10 , permute16 , 11+12+13+14+15+0+1+2+3+4+5+6+7+8+9+10       , # rotate
+1 , Vec16c Vec16s Vec16i Vec16f , , 2 4 10 , permute16 , 14+15+10+11+0+1+2+3+8+9+-1+13+4+5+6+7       , # bigger block permutation
+1 , Vec16c                      , , 2 4 10 , permute16 , 15+14+11+10+1+0+3+2+9+8+13+12+5+4+7+6       , # 16 bit permute with bytes swapped
+1 , Vec16c Vec16s Vec16i Vec16f , , 2 4 10 , permute16 , 0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0             , # broadcast
+1 , Vec16c Vec16s Vec16i Vec16f , , 2 4 10 , permute16 , 9+9+9+9+9+9+9+9+9+9+9+-1+9+9+9+9            , # broadcast
+1 , Vec16s                      , , 4 8 10 , permute16 , 0+0+1+1+2+2+3+3+8+8+9+9+10+10+11+11         , # unpckl
+1 , Vec16us                     , , 4 8 10 , permute16 , 4+4+5+5+6+6+7+7+12+12+13+13+14+14+15+15     , # unpckh
+1 , Vec16s                      , , 4 8 10 , permute16 , 3+4+5+6+7+0+1+2+11+12+13+14+15+8+9+10       , # rotate within 128-bit lanes
+1 , Vec16s                      , , 4 8 10 , permute16 , 4+5+6+7+8+9+10+11+12+13+14+15+0+1+2+3       , # 256-bit rotate < 8
+1 , Vec16s                      , , 4 8 10 , permute16 , 8+9+10+11+12+13+14+15+0+1+2+3+4+5+6+7       , # 256-bit rotate 8
+1 , Vec16s                      , , 4 8 10 , permute16 , 9+10+11+12+13+14+15+0+1+2+3+4+5+6+7+8       , # 256-bit rotate > 8
+1 , Vec16s                      , , 4 8 10 , permute16 , 0+3+1+2+4+5+6+7+8+11+9+10+12+13+14+15       , # vpshuflw
+1 , Vec16s                      , , 4 8 10 , permute16 , 0+1+2+3+4+7+6+7+8+9+10+11+12+15+14+15       , # vpshufhw
+1 , Vec16s                      , , 4 8 10 , permute16 , 3+0+0+2+ 4+5+6+6+ 11+8+8+10+ 12+13+14+14    , # same pattern in two 128-bit lanes. fits vpshuflw vpshufhw
+1 , Vec16s                      , , 4 8 10 , permute16 , 4+5+1+7+2+0+3+6+8+15+10+9+13+14+11+12       , # no crossing 128 bit lane
+1 , Vec16s                      , , 4 8 10 , permute16 , 4+5+1+7+2+0+3+6+4+7+2+0+5+1+3+6             , # all from low 128 bit lane
+1 , Vec16s                      , , 4 8 10 , permute16 , 12+13+10+14+8+9+11+15+11+12+9+10+13+8+14+15 , # all from high 128 bit lane
+1 , Vec16s                      , , 4 8 10 , permute16 , 8+15+10+11+9+13+14+12+7+2+4+5+1+0+3+6       , # all from opposite 128 bit lane
+1 , Vec16i Vec16f , ,   8 10 , permute16 , 0+0+1+1+4+4+5+5+8+8+9+9+12+12+13+13         , # unpckl
+1 , Vec16ui Vec16f , ,   8 10 , permute16 , 2+2+3+3+6+6+7+7+10+10+11+11+14+14+15+15     , # unpckh
+1 , Vec16i Vec16f , ,   8 10 , permute16 , 2+2+3+0+6+6+7+4+10+10+11+8+14+14+15+12      , # same pattern in 4 lanes
+1 , Vec16i Vec16f , ,   8 10 , permute16 , 2+2+3+0+4+-1+-1+6+11+10+8+8+13+14+15+12     , # no crossing of 4 lanes
+1 , Vec16s Vec16i Vec16f , , 9 10 , permute16 , 0+-1+1+-1+2+-1+3+-1+4+-1+5+-1+6+-1+7+-1  , # zero extension
+1 , Vec16s Vec16i Vec16f , , 9 10 , permute16 , -1+-1+1+-1+2+-1+3+-1+4+-1+5+-1+6+-1+7+-1 , # zero extension + zeroing
+1 , Vec16c Vec16s Vec16i Vec16f , , 9 10 , permute16 , 0+2+5+6+10+14+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1 # compress
+1 , Vec16c Vec16s Vec16i Vec16f , , 9 10 , permute16 , 0+2+4+7+10+-1+12+-1+-1+-1+-1+-1+-1+-1+-1+-1 # compress + zeroing
+1 , Vec16c Vec16s Vec16i Vec16f , , 9 10 , permute16 , -1+0+1+2+-1+-1+3+4+-1+-1+-1+-1+5+-1+-1+-1 # expand
+1 , Vec16c Vec16s Vec16i Vec16f , , 9 10 , permute16 , -1+-1+1+2+-1+-1+-1+-1+3+4+-1+-1+5+-1+-1+-1 # expand + zeroing
+1 , Vec16c Vec16s Vec16i Vec16f , , 2 4 10 , permute16 , 0+2+9+10+4+6+13+14+15+3+11+13+12+5+3+8      , # random
+1 , Vec16c Vec16s Vec16i Vec16f , , 2 4 10 , permute16 , 0+2+9+-1+4+6+13+-1+15+3+11+13+12+5+3+8      , # random, zero
+1 , Vec16uc Vec16us Vec16ui     , , 2 4 10 , permute16 , 0+2+9+10+4+6+13+14+15+3+V_DC+13+12+5+3+8    , # don't care, unsigned
+
+# permute32
+1 , Vec32c  , , 4 8 10 , permute32 , 0+1+2+3+4+5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20+21+22+23+24+25+26+27+28+29+30+31           , # no permute  
+1 , Vec32c  , , 4 8 10 , permute32 , 0+1+2+3+4+-1+-1+-1+8+9+10+11+12+13+14+15+16+17+18+19+20+21+22+23+24+25+26+27+28+29+30+31        , # no permute, zero
+1 , Vec32c  , , 4 8 10 , permute32 , 11+12+13+14+15+0+1+2+3+4+5+6+7+8+9+10+27+28+29+30+31+16+17+18+19+20+21+22+23+24+25+26           , # rotate within 128-bit lanes
+1 , Vec32c  , , 4 8 10 , permute32 , 5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20+21+22+23+24+25+26+27+28+29+30+31+0+1+2+3+4           , # 256-bit rotate < 16
+1 , Vec32c  , , 4 8 10 , permute32 , 25+26+27+28+29+30+31+0+1+2+3+4+5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20+21+22+23+24           , # 256-bit rotate > 16
+1 , Vec32c  , , 4 8 10 , permute32 , 8+9+10+11+0+1+2+3+4+5+18+19+28+29+6+7+12+13+20+21+22+23+24+25+26+27+14+15+16+17+30+31           , # 16 bit permute
+1 , Vec32c  , , 4 8 10 , permute32 , 0+1+8+9+12+13+2+10+11+3+4+5+6+7+14+15+20+21+22+26+16+17+18+19+27+23+24+25+28+29+30+31           , # no crossing of 128-bit lane
+1 , Vec32c  , , 4 8 10 , permute32 , 0+1+8+9+12+13+2+10+11+3+4+5+6+7+14+15+0+1+8+9+12+4+5+6+13+2+10+11+3+7+14+15                     , # all from low 128-bit lane
+1 , Vec32c  , , 4 8 10 , permute32 , 20+21+22+24+25+26+16+17+18+19+27+23+28+29+30+31+20+21+22+26+16+17+18+19+27+23+24+25+28+29+30+31 , # all from high 128-bit lane
+1 , Vec32c  , , 4 8 10 , permute32 , 20+21+22+24+25+26+16+17+18+19+27+23+28+29+30+31+0+1+8+9+12+11+3+4+5+13+2+10+6+7+14+15           , # all from opposite 128-bit lane
+1 , Vec32c  , , 4 8 10 , permute32 , 0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0                                 , # broadcast
+1 , Vec32c  , , 8 10   , permute32 , 0+-1+1+-1+2+-1+3+-1+4+-1+5+-1+6+-1+7+-1+8+-1+9+-1+10+-1+11+-1+12+-1+13+-1+14+-1+15+-1                                , # zero extend
+1 , Vec32c  , , 8 10   , permute32 , -1+-1+1+-1+2+-1+3+-1+4+-1+5+-1+6+-1+7+-1+8+-1+9+-1+10+-1+11+-1+12+-1+13+-1+-1+-1+-1+-1                                , # zero extend + additional zeroing
+1 , Vec32c  , , 8 10   , permute32 , 1+2+4+-1+13+30+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1    , # compress + zero
+1 , Vec32c  , , 8 10   , permute32 , -1+0+1+-1+-1+-1+2+-1+4+-1+-1+-1+-1+-1+5+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+6+-1+-1       , # expand + zero
+1 , Vec32c  , , 4 8 10 , permute32 , 20+21+16+17+18+19+9+12+11+3+24+25+26+10+27+23+4+5+13+2+22+28+29+30+31+0+1+8+6+7+14+15           , # random
+1 , Vec32c  , , 4 8 10 , permute32 , 20+21+16+17+18+19+9+12+11+3+24+25+26+10+27+23+4+5+13+2+22+-1+29+30+31+0+1+-1+6+7+14+15          , # random, zero
+1 , Vec32uc , , 4 8 10 , permute32 , 20+21+16+17+18+19+9+12+11+3+24+25+26+10+27+23+4+5+13+2+22+-1+29+30+31+0+1+-1+6+7+14+15          , # unsigned
+
+
+###########################
+# Only in VCL version 2:
+###########################
+
+# permute32. Not in version 1.xx:
+1 , Vec32s  , , 8 10 , permute32 , 0+1+2+3+4+5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20+21+22+23+24+25+26+27+28+29+30+31           , # no permute  
+1 , Vec32s  , , 8 10 , permute32 , 0+1+2+3+4+-1+-1+-1+8+9+10+11+12+13+14+15+16+17+18+19+20+21+22+23+24+25+26+27+28+29+30+31        , # no permute, zero
+1 , Vec32s  , , 8 10 , permute32 , 3+4+5+6+7+0+1+2+ 11+-1+V_DC+14+15+8+9+10+ 19+20+21+22+23+16+17+18+ 27+28+29+30+31+24+25+26      , # rotate within 128-bit lanes
+1 , Vec32s  , , 8 10 , permute32 , 5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20+21+22+23+24+25+26+27+28+29+30+31+0+1+2+3+4           , # 512-bit rotate < 8
+1 , Vec32s  , , 8 10 , permute32 , 17+18+19+20+21+22+23+24+25+26+27+28+29+30+31+0+1+2+3+4+5+6+7+8+9+10+11+12+13+14+15+16           , # 512-bit rotate > 8
+1 , Vec32s  , , 8 10 , permute32 , 8+9+10+11+0+1+2+3+4+5+18+19+28+29+6+7+12+13+20+21+22+23+24+25+26+27+14+15+16+17+30+31           , # 32 bit permute
+1 , Vec32s  , , 8 10 , permute32 , 2+4+5+2+3+3+7+6+ 8+15+14+13+9+10+-1+8+ 19+19+19+19+20+20+17+23+ 28+27+27+28+24+31+30+25         , # no crossing of 128-bit lane
+1 , Vec32s  , , 8 10 , permute32 , 0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0                                 , # broadcast
+1 , Vec32s  , , 8 10 , permute32 , 7+6+5+4+0+1+2+3+15+14+13+12+-1+9+10+11+23+22+21+20+16+17+18+19+31+30+29+28+24+25+26+27          , # same pattern in all lanes
+1 , Vec32s  , , 8 10 , permute32 , 0+-1+1+-1+2+-1+3+-1+4+-1+5+-1+6+-1+7+-1+8+-1+9+-1+10+-1+11+-1+12+-1+13+-1+14+-1+15+-1                                , # zero extend
+1 , Vec32s  , , 8 10 , permute32 , -1+-1+1+-1+2+-1+3+-1+4+-1+5+-1+6+-1+7+-1+8+-1+9+-1+10+-1+11+-1+12+-1+13+-1+-1+-1+-1+-1                                , # zero extend + additional zeroing
+1 , Vec32s  , , 8 10 , permute32 , 1+2+4+-1+13+30+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1 , # compress + zero
+1 , Vec32s  , , 8 10 , permute32 , -1+0+1+-1+-1+-1+2+-1+4+-1+-1+-1+-1+-1+5+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+6+-1+-1 , # expand + zero
+1 , Vec32s  , , 8 10 , permute32 , 20+21+16+17+18+19+9+12+11+3+24+25+26+10+27+23+4+5+13+2+22+28+29+30+31+0+1+8+6+7+14+15           , # random
+1 , Vec32s Vec32us , , 8 10 , permute32 , 20+21+16+17+18+19+9+12+11+3+24+25+26+10+27+23+4+5+13+2+22+-1+29+30+31+0+1+-1+6+7+14+15   , # random, zero
+
+# permute64. Not in version 1.xx:
+1 , Vec64c  , ,  8 10 , permute64 , 0+1+2+3+4+5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20+V_DC+-1+23+24+25+26+27+28+29+30+31+32+33+34+35+36+37+38+39+40+41+42+43+44+45+46+47+48+49+50+51+52+53+54+55+56+57+58+59+60+61+62+63 , # no permute
+1 , Vec64c  , ,  8 10 , permute64 , 60+61+62+63+4+5+6+7+8+9+10+11+12+13+14+15+32+33+34+35+36+37+38+39+40+41+42+43+44+45+46+47+16+17+18+19+20+21+22+23+24+25+26+27+28+29+30+31+48+49+50+51+52+53+54+55+56+57+58+59+60+61+62+63 , # larger block
+1 , Vec64c  , ,  8 10 , permute64 , 12+1+2+3+7+8+9+10+11+4+5+6+12+13+14+15+19+26+27+28+17+18+25+29+30+31+19+20+V_DC+-1+23+24+44+45+46+47+32+33+36+37+38+39+40+41+34+35+42+40+48+49+50+51+52+53+54+55+56+57+58+59+60+61+62+63 , # no lane crossing
+1 , Vec64c  , ,  8 10 , permute64 , 27+28+29+30+31+32+33+34+35+36+37+38+39+40+41+42+43+44+45+46+47+48+49+50+51+52+53+54+55+56+57+58+59+60+61+62+63+0+1+2+3+4+5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20+21+22+23+24+25+26 , # full rotate
+1 , Vec64c  , ,  8 10 , permute64 , 0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0+0 , # broadcast
+1 , Vec64c  , ,  9 10 , permute64 , 0+-1+1+-1+2+-1+3+-1+4+-1+5+-1+6+-1+7+-1+8+-1+9+-1+10+-1+11+-1+12+-1+13+-1+14+-1+15+-1+16+-1+17+-1+18+-1+19+-1+20+-1+21+-1+22+-1+23+-1+24+-1+25+-1+26+-1+27+-1+28+-1+29+-1+30+-1+31+-1 , # zero extend
+1 , Vec64c , , 9 10 , permute64 , 1+2+4+-1+13+30+60+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1 , # compress
+1 , Vec64c , , 9 10 , permute64 , -1+0+1+-1+-1+-1+2+-1+4+-1+-1+-1+-1+-1+5+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+6+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+-1+7 , # expand
+1 , Vec64c  , ,  8 10 , permute64 , 0+1+2+3+55+56+36+37+38+-1+40+58+59+12+13+14+15+48+49+50+51+52+53+4+5+6+7+8+9+10+11+54+60+61+62+63+16+17+18+19 +55+56+57+41+42+43+57+1+23+29+30+31+32+33+-1+-1+58+59+20+2+44+45+46+47, # random
+
+
+# blend functions
+# ===============
+
+# blend2
+2 , Vec2q Vec2d , , 2 4 5 10 , blend2 , -1+V_DC , # just zero
+2 , Vec2q Vec2d , , 2 4 5 10 , blend2 , 1+0     , # all elements from a
+2 , Vec2q Vec2d , , 2 4 5 10 , blend2 , 3+3     , # all elements from b
+2 , Vec2q Vec2d , , 2 4 5 10 , blend2 , 0+3     , # blend without permute
+2 , Vec2q Vec2d , , 2 4 5 10 , blend2 , 0+2     , # punpcklqdq
+2 , Vec2q Vec2d , , 2 4 5 10 , blend2 , 2+0     , # punpcklqdq
+2 , Vec2q Vec2d , , 2 4 5 10 , blend2 , 1+3     , # punpckhqdq
+2 , Vec2q Vec2d , , 2 4 5 10 , blend2 , 3+1     , # punpckhqdq
+2 , Vec2q Vec2d , , 2 4 5 10 , blend2 , 1+2     , # rotate left or shufpd
+2 , Vec2q Vec2d , , 2 4 5 10 , blend2 , 3+0     , # rotate right or shufpd
+2 , Vec2q Vec2uq Vec2d , , 2 4 5 10 , blend2 , 2+-1 , # zeroing
+
+# blend4
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 0+2+1+3  , # all from a
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 6+7+4+5  , # all from b
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 0+1+4+5  , # 128-bit block blend
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 4+1+2+7  , # blend without permute
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 4+5+-1+3 , # blend without permute, zero
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 0+4+2+6  , # punpcklqdq
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 4+0+6+2  , # punpcklqdq
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 1+5+3+7  , # punpckhqdq
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 5+1+7+3  , # punpckhqdq
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 1+5+-1+7 , # punpckhqdq, zeroing
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 1+2+3+4  , # rotate
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 5+0+7+2  , # rotate within lanes
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 1+4+3+6  , # rotate within lanes
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 0+5+3+7  , # shufpd
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 5+1+6+3  , # shufpd
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 1+6+0+3  , # random
+2 , Vec4q Vec4uq Vec4d , , 6 8 10 , blend4 , 7+-1+1+5 , # random, zero
+2 , Vec4q Vec4d , , 6 8 10 , blend4 , 1+4+V_DC+0 , # random, don't care
+
+
+# blend8
+2 , Vec8s Vec8i Vec8q Vec8f Vec8d, , 3 8 10 , blend8 , 6+6+0+2+4+3+1+7      , # all elements from a
+2 , Vec8s Vec8i Vec8q Vec8f Vec8d, , 3 8 10 , blend8 , 9+12+15+8+10+11+13+8 , # all elements from b
+2 , Vec8s Vec8i Vec8q Vec8f Vec8d, , 3 8 10 , blend8 , 8+9+2+3+12+-1+6+15   , # blend without permute, zeroing
+2 , Vec8s Vec8i Vec8q Vec8f Vec8d, , 3 8 10 , blend8 , 8+9+2+-1+12+13+6+7   , # larger block blend
+2 , Vec8s                        , , 3   10 , blend8 , 0+8+1+9+2+10+3+11    , # punpcklwd a,b
+2 , Vec8s                        , , 3   10 , blend8 , 8+0+9+1+10+2+11+3    , # punpcklwd b,a
+2 , Vec8s                        , , 3   10 , blend8 , 4+12+5+13+6+14+7+15  , # punpckhwd a,b
+2 , Vec8s                        , , 3   10 , blend8 , 12+4+13+5+14+6+15+7  , # punpckhwd b,a
+2 , Vec8s Vec8i Vec8q            , , 3   10 , blend8 , 13+14+15+0+1+2+3+4   , # shift/rotate right
+2 , Vec8s Vec8i Vec8q            , , 3   10 , blend8 , 5+6+7+8+9+10+11+12   , # shift/rotate left
+2 ,       Vec8i       Vec8f      , , 7 8 10 , blend8 , 0+8+1+9+4+12+5+13    , # unpckl a+b
+2 ,       Vec8i       Vec8f      , , 7 8 10 , blend8 , 8+0+9+1+12+4+13+5    , # unpckl b+a
+2 ,       Vec8i       Vec8f      , , 7 8 10 , blend8 , 2+10+3+11+6+14+7+15  , # unpckh a+b
+2 ,       Vec8i       Vec8f      , , 7 8 10 , blend8 , 10+2+11+3+14+6+15+7  , # unpckh b+a
+2 ,       Vec8i       Vec8f      , , 7 8 10 , blend8 , 3+8+9+10+7+12+13+14  , # rotate within lanes
+2 ,       Vec8i       Vec8f      , , 7 8 10 , blend8 , 9+10+11+0+13+14+15+4 , # rotate within lanes
+2 ,       Vec8i       Vec8f      , , 7 8 10 , blend8 , 0+2+9+9+4+6+13+13    , # shufps
+2 ,       Vec8i       Vec8f      , , 7 8 10 , blend8 , 11+10+1+2+15+14+5+6  , # shufps
+2 ,             Vec8q       Vec8d, , 4 8 10 , blend8 , 0+8+2+10+4+12+6+14   , # unpckl
+2 ,             Vec8q       Vec8d, , 4 8 10 , blend8 , 8+0+10+2+12+4+14+6   , # unpckl
+2 ,             Vec8q       Vec8d, , 4 8 10 , blend8 , 1+9+3+11+5+13+7+15   , # unpckh
+2 ,             Vec8q       Vec8d, , 4 8 10 , blend8 , 9+1+11+3+13+5+15+7   , # unpckh
+2 ,             Vec8q       Vec8d, , 4 8 10 , blend8 , 0+8+3+10+4+13+7+15   , # pshufd
+2 ,             Vec8q       Vec8d, , 4 8 10 , blend8 , 8+0+11+3+12+5+15+6   , # pshufd
+2 , Vec8s Vec8us Vec8i Vec8ui Vec8q Vec8uq Vec8f Vec8d, , 3 8 9 10 , blend8 , 3+5+V_DC+-1+14+V_DC+0+6 , # all random
+
+
+# blend16
+2 , Vec16c Vec16s Vec16i Vec16f , , 2 4 10 , blend16 , 2+1+7+4+14+15+10+-1+V_DC+5+0+8+4+9+12+6 , # all from a
+2 , Vec16c Vec16s Vec16i Vec16f , , 2 4 10 , blend16 , 18+30+20+24+24+25+31+17+22+16+V_DC+25+-1+18+19+26 , # all from b
+2 , Vec16c Vec16s Vec16i Vec16f , , 2 5 10 , blend16 , 0+1+18+19+4+21+6+7+8+9+10+11+12+13+30+15 , # blend without permute
+2 , Vec16c Vec16s Vec16i Vec16f , , 2 5 10 , blend16 , 0+1+18+19+4+21+6+7+8+9+10+-1+-1+V_DC+30+15 , # blend and zeroing
+2 , Vec16c Vec16s Vec16i Vec16f , , 2 5 10 , blend16 , 16+17+0+1+4+5+10+11+28+29+30+31+8+9+20+21 , # larger block size
+2 , Vec16c Vec16s Vec16i Vec16f , , 2 5 10 , blend16 , 18+19+8+9+2+3+-1+-1+-1+27+18+19+30+31+0+1 , # larger block w. zero
+2 , Vec16c                      , , 3 , blend16 , 0+16+1+17+2+18+3+19+4+20+5+21+6+22+7+23 , # punpcklbw a,b
+2 , Vec16c                      , , 3 , blend16 , 16+0+17+1+18+2+19+3+20+4+21+5+22+6+23+7 , # punpcklbw b,a
+2 , Vec16c                      , , 3 , blend16 , 8+24+9+25+10+26+11+27+12+28+13+29+14+30+15+31 , # punpckhbw a,b
+2 , Vec16c                      , , 3 , blend16 , 24+8+25+9+26+10+27+11+28+12+29+13+30+14+31+15 , # punpckhbw b,a
+2 , Vec16c                      , , 3 , blend16 , 8+24+9+25+-1+V_DC+11+27+12+28+13+29+14+30+15+31 , # punpckhbw w. zero
+2 , Vec16c Vec16s Vec16i        , , 2 4 , blend16 , 19+20+21+22+23+24+25+26+27+28+29+30+31+0+1+2 , # shift/rotate
+2 , Vec16c Vec16s Vec16i        , , 2 4 , blend16 , 5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20   , # shift/rotate
+2 ,        Vec16s               , , 5 8 10 , blend16 , 0+16+1+17+2+18+3+19+8+24+9+25+10+26+11+27  # unpcklo
+2 ,        Vec16s               , , 5 8 10 , blend16 , 16+0+17+1+18+2+19+3+24+8+25+9+26+10+27+11  # unpcklo
+2 ,        Vec16s               , , 5 8 10 , blend16 , 4+20+5+21+6+22+7+23+12+28+13+29+14+30+15+31  # unpckhi
+2 ,        Vec16s               , , 5 8 10 , blend16 , 20+4+21+5+22+6+23+7+28+12+29+13+30+14+31+15  # unpckhi
+2 ,        Vec16s               , , 5 8 10 , blend16 , 23+0+1+2+3+4+5+6+31+8+9+10+11+12+13+14 # rotate within lanes
+2 ,        Vec16s               , , 5 8 10 , blend16 , 3+4+5+6+7+16+17+18+11+12+13+14+15+24+25+26 # rotate within lanes
+2 ,               Vec16i Vec16f , ,   9 10 , blend16 , 0+16+1+17+4+20+5+21+8+24+9+25+12+28+13+29  # unpcklo
+2 ,               Vec16i Vec16f , ,   9 10 , blend16 , 16+0+17+1+20+4+21+5+24+8+25+9+28+12+29+13    # unpcklo
+2 ,               Vec16i Vec16f , ,   9 10 , blend16 , 2+18+3+19+6+22+7+23+10+26+11+27+14+30+15+31  # unpckhi
+2 ,               Vec16i Vec16f , ,   9 10 , blend16 , 18+2+19+3+22+6+23+7+26+10+27+11+30+14+31+15  # unpckhi
+2 ,               Vec16i Vec16f , ,   9 10 , blend16 , 1+2+16+19+5+6+20+23+9+10+24+27+13+14+28+31 # shufps
+2 ,               Vec16i Vec16f , ,   9 10 , blend16 , 19+18+2+1+23+22+6+5+27+26+10+9+31+30+14+13 # shufps
+2 ,               Vec16i Vec16f , ,   9 10 , blend16 , 3+16+17+1+7+20+21+5+11+24+25+9+15+-1+29+13 # same pattern in all lanes
+2 , Vec16c Vec16s Vec16i Vec16f , , 3 7 8 9 10 , blend16 , 21+11+0+8+12+13+1+18+-1+4+7+9+10+30+6+15 , # all random
+2 , Vec16uc Vec16us Vec16ui     , , 3 7 8 9 10 , blend16 , 20+11+0+8+1+18+-1+4+7+12+13+9+14+30+6+15 , # all random
+
+
+###########################
+# Only in VCL version 2:
+###########################
+
+# blend32. Not in version 1.xx !
+2 , Vec32c Vec32s , , 8 9 10 , blend32 , 22+8+9+10+11+0+1+2+23+7+3+18+19+28+24+25+26+4+5+20+21+12+13+14+15+16+17+27+6+29+30+31 # all from a
+2 , Vec32c Vec32s , , 8 9 10 , blend32 , 62+63+32+33+34+-1+-1+37+38+39+50+50+50+-1+54+48+49+58+59+60+61+55+56+57+40+41+42+43+44+45+46+47 # all from b
+2 , Vec32c Vec32s , , 8 9 10 , blend32 , 0+1+34+35+4+5+6+7+8+9+10+11+12+13+14+15+48+17+18+51+-1+-1+54+55+56+57+58+59+60+61+62+63 # blend only
+2 , Vec32c Vec32s , , 8 9 10 , blend32 , 0+1+42+43+24+25+36+37+8+9+54+55+56+-1+58+59+60+61+40+41+42+43+46+47+18+19+20+21+22+23+24+25 # larger block
+2 , Vec32c Vec32s , , 8 9 10 , blend32 , 19+20+1+42+43+24+25+9+54+55+36+37+8+56+-1+58+0+47+18+59+60+42+43+61+40+41+46+21+22+23+24+25 # random
+2 , Vec32uc Vec32us,, 8 9 10 , blend32 , V_DC+55+36+37+8+56+-1+-1+0+47+18+V_DC+60+42+43+61+40+41+19+20+1+42+43+V_DC+25+9+46+21+22+23+24+25 # random
+
+# blend64. Not in version 1.xx !
+
+2 , Vec64c , , 8 10 , blend64 , 43+44+2+24+39+40+41+3+11+12+13+14+15+32+33+34+35+36+37+38+9+10+22+23+42+46+47+48+49+50+51+52+53+54+55+45+0+1+56+57+58+59+60+61+62+63+16+17+18+19+20+21+4+5+6+7+8+25+26+27+28+29+30+31 # all from a
+2 , Vec64c , , 8 10 , blend64 , 86+97+108+99+100+-1+102+103+104+105+106+107+108+109+110+111+96+97+98+99+100+101+102+103+104+105+106+107+108+109+110+111+64+65+66+67+68+69+70+71+72+73+74+75+76+77+78+79+112+113+114+115+116+117+118+119+120+121+122+123+124+125+126+127 # all from b
+2 , Vec64c , , 8 10 , blend64 , -1+-1+-1+3+4+5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20+21+22+23+24+25+26+27+28+29+30+31+96+97+98+99+100+101+102+103+104+105+106+107+108+109+110+111+112+113+114+115+116+117+118+119+120+121+122+123+124+125+126+127 # blend only
+2 , Vec64c , , 8 10 , blend64 , -1+-1+-1+3+4+5+6+7+28+29+10+11+12+13+14+15+16+17+18+19+20+21+22+23+24+25+26+27+28+29+30+31+96+97+8+9+100+101+102+103+104+105+106+107+108+109+110+111+112+113+14+15+36+37+118+119+120+121+42+43+124+125+126+127 # larger block size
+2 , Vec64c , , 8 10 , blend64 , -1+9+100+1+32+-1+-1+3+29+10+11+12+13+14+15+16+17+4+5+6+7+28+18+19+20+24+25+26+27+28+29+30+31+96+97+8+103+104+105+106+V_DC+108+109+110+111+112+113+14+15+36+37+8+69+21+22+23+120+121+42+43+124+125+126+127 # random
+2 , Vec64uc, , 10   , blend64 , -1+9+100+1+32+-1+-1+3+29+10+11+12+13+14+15+16+17+4+5+6+7+28+18+19+20+24+25+26+27+28+29+30+31+96+97+8+103+104+105+106+V_DC+108+109+110+111+112+113+14+15+36+37+8+69+21+22+23+120+121+42+43+124+125+126+127 # random
+
+
+
+# lookup functions
+# ================
+
+# lookup with one index vector and one data vector
+3 , Vec16c ,       , 2 5 10     , lookup16 ,
+3 , Vec32c ,       , 2 8 10     , lookup32 ,
+3 , Vec64c ,       , 2 5 8 9 10 , lookup64 ,
+3 , Vec8s  ,       , 2 5 10     , lookup8 ,
+3 , Vec16s ,       , 2 8 10     , lookup16 ,
+3 , Vec32s ,       , 2 5 8 9 10 , lookup32 ,
+3 , Vec4i  ,       , 2 5 10     , lookup4 ,
+3 , Vec8i  ,       , 2 8 10     , lookup8 ,
+3 , Vec16i ,       , 2 5 8 9 10 , lookup16 ,
+3 , Vec4q  ,       , 2 8 10     , lookup4 ,
+3 , Vec8q  ,       , 2 5 8 9 10 , lookup8 ,
+3 , Vec4i  , Vec4f , 2 5 10     , lookup4 ,
+3 , Vec8i  , Vec8f , 2 5 10     , lookup8 ,
+3 , Vec16i , Vec16f, 2 5 10     , lookup16 ,
+3 , Vec2q  , Vec2d , 2 5 10     , lookup2 ,
+3 , Vec4q  , Vec4d , 2 5 10     , lookup4 ,
+3 , Vec8q  , Vec8d , 2 5 10     , lookup8 ,
+
+# lookup with one index vector and two data vectors
+4 , Vec16c ,       , 2 5 10     , lookup32 , 
+4 , Vec64c ,       , 2 5 8 9 10 , lookup128 , 
+4 , Vec8s  ,       , 2 5 10     , lookup16 , 
+4 , Vec32s ,       , 2 5 8 9 10 , lookup64 ,
+4 , Vec4i  ,       , 2 5 10     , lookup8 , 
+4 , Vec16i ,       , 2 5 8 9 10 , lookup32 , 
+4 , Vec4i  , Vec4f , 2 5 10     , lookup8 ,
+4 , Vec2q  , Vec2d , 2 5 10     , lookup4 ,
+
+# lookup w. four data vectors
+5 , Vec4i  , , 2 5 8 10 , lookup16  ,
+5 , Vec16i , , 2 5 8 10 , lookup64  ,
+5 , Vec64c , , 2 8 9 10 , lookup256 ,
+5 , Vec32s , , 2 8 9 10 , lookup128 ,
+
+# lookup w. table
+6 , Vec16c Vec32c , , 3 8 9 10 , lookup ,
+6 , Vec8s Vec16s , , 3 8 9 10 , lookup ,
+6 , Vec4i Vec8i Vec16i , , 3 8 9 10 , lookup ,
+6 , Vec4q Vec8q , , 3 8 9 10 , lookup ,
+6 , Vec4i , Vec4f , 3 8 9 10 , lookup ,
+6 , Vec8i , Vec8f , 3 8 9 10 , lookup ,
+6 , Vec16i, Vec16f, 3 8 9 10 , lookup ,
+6 , Vec2q , Vec2d , 3 8 9 10 , lookup ,
+6 , Vec4q , Vec4d , 3 8 9 10 , lookup ,
+6 , Vec8q , Vec8d , 3 8 9 10 , lookup ,
+
+
+# shift functions
+# ===============
+
+# shift_bytes_up
+7 , Vec16c , , 8    , shift_bytes_up , 0
+7 , Vec16c , , 8    , shift_bytes_up , 4
+7 , Vec16c , , 8    , shift_bytes_up , 8
+7 , Vec16c , , 8    , shift_bytes_up , 15
+7 , Vec16c , , 8    , shift_bytes_up , 16
+7 , Vec32c , , 8 10 , shift_bytes_up , 0
+7 , Vec32c , , 8 10 , shift_bytes_up , 1
+7 , Vec32c , , 8 10 , shift_bytes_up , 8
+7 , Vec32c , , 8 10 , shift_bytes_up , 15
+7 , Vec32c , , 8 10 , shift_bytes_up , 16
+7 , Vec32c , , 8 10 , shift_bytes_up , 17
+7 , Vec32c , , 8 10 , shift_bytes_up , 20
+7 , Vec32c , , 8 10 , shift_bytes_up , 31
+7 , Vec32c , , 8 10 , shift_bytes_up , 32
+7 , Vec64c , , 8 10 , shift_bytes_up , 0
+7 , Vec64c , , 8 10 , shift_bytes_up , 1
+7 , Vec64c , , 8 10 , shift_bytes_up , 8
+7 , Vec64c , , 8 10 , shift_bytes_up , 15
+7 , Vec64c , , 8 10 , shift_bytes_up , 16
+7 , Vec64c , , 8 10 , shift_bytes_up , 17
+7 , Vec64c , , 8 10 , shift_bytes_up , 20
+7 , Vec64c , , 8 10 , shift_bytes_up , 31
+7 , Vec64c , , 8 10 , shift_bytes_up , 32
+7 , Vec64c , , 8 10 , shift_bytes_up , 33
+7 , Vec64c , , 8 10 , shift_bytes_up , 63
+7 , Vec64c , , 8 10 , shift_bytes_up , 64
+
+# shift_bytes_down
+8, Vec16c , , 8    , shift_bytes_down , 0
+8, Vec16c , , 8    , shift_bytes_down , 4
+8, Vec16c , , 8    , shift_bytes_down , 8
+8, Vec16c , , 8    , shift_bytes_down , 15
+8, Vec16c , , 8    , shift_bytes_down , 16
+8, Vec32c , , 8 10 , shift_bytes_down , 0
+8, Vec32c , , 8 10 , shift_bytes_down , 1
+8, Vec32c , , 8 10 , shift_bytes_down , 8
+8, Vec32c , , 8 10 , shift_bytes_down , 15
+8, Vec32c , , 8 10 , shift_bytes_down , 16
+8, Vec32c , , 8 10 , shift_bytes_down , 17
+8, Vec32c , , 8 10 , shift_bytes_down , 20
+8, Vec32c , , 8 10 , shift_bytes_down , 31
+8, Vec32c , , 8 10 , shift_bytes_down , 32
+8, Vec64c , , 9 10 , shift_bytes_down , 0
+8, Vec64c , , 9 10 , shift_bytes_down , 1
+8, Vec64c , , 9 10 , shift_bytes_down , 8
+8, Vec64c , , 9 10 , shift_bytes_down , 15
+8, Vec64c , , 9 10 , shift_bytes_down , 16
+8, Vec64c , , 9 10 , shift_bytes_down , 17
+8, Vec64c , , 9 10 , shift_bytes_down , 20
+8, Vec64c , , 9 10 , shift_bytes_down , 31
+8, Vec64c , , 9 10 , shift_bytes_down , 32
+8, Vec64c , , 9 10 , shift_bytes_down , 33
+8, Vec64c , , 9 10 , shift_bytes_down , 63
+8, Vec64c , , 9 10 , shift_bytes_down , 64
+
+# change_sign
+9, Vec2d       , , 2 7 8 9 10 , change_sign, 1+0
+9, Vec4f Vec4d , , 2 7 8 9 10 , change_sign, 0+1+1+0
+9, Vec8f Vec8d , , 2 7 8 9 10 , change_sign, 1+1+1+0+0+0+0+1
+9, Vec8f Vec8d , , 2 7 8 9 10 , change_sign, 0+0+0+0+0+0+0+0
+9, Vec8f Vec8d , , 2 7 8 9 10 , change_sign, 1+1+1+1+1+1+1+1
+9, Vec16f      , , 2 7 8 9 10 , change_sign, 0+1+1+0+0+0+0+1+0+0+0+0+0+0+1+1
+
+
+# gather functions
+# ===============
+
+# gather with fixed indexes
+10 , Vec4i ,       , 2 4 8    , gather4i , 10+12+11+13
+10 , Vec4i ,       , 2 4 8    , gather4i , 1+5+6+3
+10 , Vec4i ,       , 8        , gather4i , 10+50+60+30
+10 , Vec8i ,       , 8        , gather8i , 10+15+16+12+17+11+12+14
+10 , Vec8i ,       , 8        , gather8i , 0+5+6+2+7+1+2+4
+10 , Vec8i ,       , 8        , gather8i , 3+50+60+20+70+10+20+40
+10 , Vec16i,       , 2 4 9 10 , gather16i, 3+50+60+20+70+10+20+40+10+15+16+12+17+11+12+14
+10 , Vec2q ,       , 2 4 8    , gather2q , 10+2
+10 , Vec2q ,       , 4        , gather2q , 1+0
+10 , Vec4q ,       , 2 4 8    , gather4q , 10+12+11+13
+10 , Vec4q ,       , 2 4 8    , gather4q , 1+5+6+3
+10 , Vec4q ,       , 5 10     , gather4q , 10+50+60+30
+10 , Vec8q ,       , 8 9 10   , gather8q , 0+5+6+2+7+1+2+4
+10 , Vec4i , Vec4f , 4 8      , gather4f , 10+12+11+13
+10 , Vec4i , Vec4f , 4 8      , gather4f , 1+5+6+3
+10 , Vec4i , Vec4f , 8        , gather4f , 10+50+60+30
+10 , Vec8i , Vec8f , 5 8 9    , gather8f , 10+15+16+12+17+11+12+14
+10 , Vec8i , Vec8f , 8        , gather8f , 0+5+6+2+7+1+2+4
+10 , Vec8i , Vec8f , 8        , gather8f , 3+50+60+20+70+10+20+40
+10 , Vec16i, Vec16f, 2 4 9 10 , gather16f, 3+50+60+20+70+10+20+40+10+15+16+12+17+11+12+14
+10 , Vec2q , Vec2d , 2 4 8    , gather2d , 10+2
+10 , Vec2q , Vec2d , 4        , gather2d , 1+0
+10 , Vec4q , Vec4d , 2 4 8    , gather4d , 10+12+11+13
+10 , Vec4q , Vec4d , 2 4 8    , gather4d , 1+5+6+3
+10 , Vec4q , Vec4d , 5 10     , gather4d , 10+50+60+30
+10 , Vec8q , Vec8d , 8 9 10   , gather8d , 0+5+6+2+7+1+2+4
+
+
+# scatter functions
+# =================
+
+# scatter with fixed indexes
+11 , Vec4i Vec4q Vec4f Vec4d , , 4 9 10 , scatter , 9+5+13+0
+11 , Vec4i Vec4q Vec4f Vec4d , , 2 9 10 , scatter , 90+80+70+33
+11 , Vec8i Vec8q Vec8f Vec8d , , 2 9 10 , scatter , 5+0+100+2+8+0+33+70
+11 , Vec16i Vec16f           , , 2 9 10 , scatter , 5+0+100+2+8+0+33+70+6+3+11+12+0+9+4+13
+
+# scatter with variable indexes
+12 , Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q ,  , 2 8 10 , scatter , 
+12 , Vec4i       , Vec4q  , 2 8 10 , scatter , 
+12 , Vec8i       , Vec8q  , 2 8 10 , scatter ,
+12 , Vec4i       , Vec4f  , 2 8 10 , scatter , 
+12 , Vec8i       , Vec8f  , 2 8 10 , scatter , 
+12 , Vec16i      , Vec16f , 2 8 10 , scatter ,
+12 , Vec4i Vec4q , Vec4d  , 2 8 10 , scatter , 
+12 , Vec8i Vec8q , Vec8d  , 2 8 10 , scatter , 
