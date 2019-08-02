@@ -1,20 +1,20 @@
 The runtest.sh script has been tested successfully with test1.lst, test2.lst, test3.lst 
 on the following platforms:
 
-Linux Ubuntu with gcc, 32 and 64 bits
+Linux Ubuntu with gcc (7.4.0), 32 and 64 bits
 
-Linux Ubuntu with clang, 32 and 64 bits
+Linux Ubuntu with clang (6.0.0), 32 and 64 bits
 
 Windows with MS Visual Studio 2019, 32 and 64 bit (Using Cygwin bash)
 
-Windows subsystem for Linux (WSL) with Ubuntu and gcc, 64 bit
+Windows subsystem for Linux (WSL) with Ubuntu and gcc (7.4.0), 64 bit
 
-Windows subsystem for Linux (WSL) with Ubuntu and clang, 64 bit
+Windows subsystem for Linux (WSL) with Ubuntu and clang (6.0.0), 64 bit
 
-Mingw-w64 with gcc, 64 bit
+Mingw-w64 with gcc (8.1.0), 64 bit
 
-Cygwin64 with gcc and Clang, 64 bit
+Cygwin64 with gcc (7.4.0) and Clang (5.0.1), 64 bit
 
-Windows with Intel compiler, 64 bit, VCL version 1.40 only
+Windows with Intel compiler 2019, 64 bit, VCL version 1.40 only
 
-Linux Ubuntu with Intel compiler, 32 and 64 bit, VCL version 1.40 only
+Linux Ubuntu with Intel compiler 2019, 32 and 64 bit, VCL version 1.40 only
