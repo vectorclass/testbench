@@ -2,7 +2,7 @@
 # runtest.sh
 # Author:        Agner Fog
 # Date created:  2019-06-02
-# Last modified: 2019-08-02
+# Last modified: 2019-09-12
 # 
 # This script will compile and run a testbench for the C++ Vector Class Library
 # Using a list of test cases.
@@ -69,6 +69,7 @@ exefilename="x"
 if [[ $OSTYPE == "cygwin" ]] ; then
   os=1  # Windows/Cygwin
   gccextraoptions="-fno-asynchronous-unwind-tables -Wno-attributes" # workaround for cygwin problems
+  clangextraoptions="-lm"
   exefilename="xx.exe"  # avoid same name as ELF exe file because they can be messed up
   echo -e "Operating system is Windows\n\n"
 elif [[ $OSTYPE == "linux-gnu" ]] ; then
