@@ -13,6 +13,10 @@ Windows subsystem for Linux (WSL) with Ubuntu and clang (6.0.0), 64 bit
 
 Mingw-w64 with gcc (8.1.0), 64 bit
 
+Mingw-w64/msys2 with gcc (9.2.0), 64 bit
+
+Mingw-w64/msys2 with clang (9.0.0), 64 bit
+
 Cygwin64 with gcc (7.4.0) and Clang (5.0.1), 64 bit
 
 Windows with Clang compiler (8.0.0) Visual Studio plugin version, 64 bit
