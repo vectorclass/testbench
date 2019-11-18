@@ -1,7 +1,7 @@
 /****************************  testbench3.cpp   *******************************
 * Author:        Agner Fog
 * Date created:  2019-04-11
-* Last modified: 2019-08-02
+* Last modified: 2019-11-18
 * Version:       2.00
 * Project:       Testbench for vector class library, 3: mathematical functions
 * Description:
@@ -296,7 +296,7 @@ inline rtype testFunction(vtype const& a) { return mul_add(a, a, a); }
 long double referenceFunction(ST a) {
     return (long double)a* a + a;
 }
-#define FACCURACY 3          // expected precision
+#define FACCURACY 8          // expected precision
 
 #elif   testcase == 13       // mul_sub_x
 inline rtype testFunction(vtype const& a) { return mul_sub_x(a, a, a); }
