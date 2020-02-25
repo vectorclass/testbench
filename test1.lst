@@ -3,23 +3,14 @@
 # Use:
 # ./runtest.sh test1.lst
 
-# choose compiler:
 $compiler=1
 $mode=64
-
-# path to testbench program
-$testbench=testbench1.cpp
-
-# path to vectorclass.h include files
-$include=./
-
-# output file
+$testbench=../testbench1/testbench1.cpp
+$include=../src2
 $outfile=test1.txt
-
-# random number seed
 $seed=1
 
-# Each line contains the following parameters, separated by commas:
+
 # test case, vector type, return type, instruction set
 
 # signed integer types
@@ -135,7 +126,7 @@ $seed=1
 507 508 ,  Vec8d , Vec8i  , 4 9 10
 509 510 ,  Vec2d , Vec4i  , 4 9 10
 
-# to_float, to_double, etc.
+# to_float etc.
 511 , Vec4i  Vec4ui  , Vec4f  , 4 9 10
 511 , Vec8i  Vec8ui  , Vec8f  , 4 9 10
 511 , Vec16i Vec16ui , Vec16f , 4 9 10
@@ -174,7 +165,7 @@ $seed=1
 601 , Vec2db , Vec4db  , 4 8 9 10
 601 , Vec4db , Vec8db  , 4 8 9 10
 
-# get_low, get_high
+# get_low/high
 602 603 , Vec32c , Vec16c , 2 4 8 10
 602 603 , Vec64c , Vec32c , 2 4 8 10
 602 603 , Vec16us, Vec8us , 2 4 8 10
@@ -214,7 +205,7 @@ $seed=1
 606 , Vec8i   , Vec8q   , 5 9 10
 606 , Vec8ui  , Vec8uq  , 6 8 10
 
-# extend_low, extend_high
+# extend_low/high
 607 608 , Vec16c , Vec8s  , 2 6 8 9 10
 607 608 , Vec32c , Vec16s , 4 9 10
 607 608 , Vec64c , Vec32s , 4 9 10
@@ -295,12 +286,15 @@ $seed=1
 616      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d ,, 2 6 8 10
 
 
-###########################
-# Only in VCL version 2:
-###########################
+### Only in version 2: ###
+##########################
 
 # constructor with all elements
 650 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec16uc Vec32uc Vec64uc Vec8us Vec16us Vec32us Vec4ui Vec8ui Vec16ui Vec2q Vec4q Vec8q Vec2uq Vec4uq Vec8uq ,, 2 8 10
 
-# horizontal_min, horizontal_max
+# horizontal_min horizontal_max
 404 405 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec16uc Vec32uc Vec64uc Vec8us Vec16us Vec32us Vec4ui Vec8ui Vec16ui Vec2q Vec4q Vec8q Vec2uq Vec4uq Vec8uq ,, 2 8 10
+
+# aligned load/store
+20 21 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10
+20 21 , Vec16c Vec8s Vec4i Vec2q Vec2uq Vec32c Vec16s Vec8i Vec4q Vec4uq Vec64c Vec64uc Vec32s Vec16i Vec8q Vec8uq , , 3 10
