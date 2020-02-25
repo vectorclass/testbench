@@ -1,8 +1,8 @@
 /****************************  testbench1.cpp   *******************************
 * Author:        Agner Fog
 * Date created:  2019-04-09
-* Last modified: 2019-08-02
-* Version:       2.00
+* Last modified: 2020-02-23
+* Version:       2.01.01
 * Project:       Testbench for vector class library
 * Description:
 * Compile and run this program to test operators and functions in VCL
@@ -36,7 +36,7 @@
 * Specify the desired instruction set and optimization options as parameters
 * to the compiler.
 *
-* (c) Copyright 2019 Agner Fog.
+* (c) Copyright 2019 - 2020 Agner Fog.
 * Gnu general public license 3.0 https://www.gnu.org/licenses/gpl.html
 ******************************************************************************
 Test cases:
@@ -57,6 +57,8 @@ Test cases:
 15:  if_sub
 16:  if_mul
 17:  if_div                (floating point types)
+20:  store_a
+21:  store_nt
 100: operator <<           (integer types)
 101: operator >>           (integer types)
 102: rotate_left           (signed integers only)
@@ -234,11 +236,11 @@ vtype referenceFunction(vtype a, vtype b) {
 #if defined(indexes) && (indexes + 0 != 0) // if indexes is not blank, use it as divisor
 const ST divisor = indexes ;
 #else
-const ST divisor = 27;
+const ST divisor = 2;
 #endif
 inline rtype testFunction(vtype const& a, vtype const& b) { 
-    return a / (divisor); 
-    //return a / const_int(divisor); 
+    //return a / (divisor); 
+    return a / const_int(divisor); 
 }
 RT referenceFunction(ST a, ST b) { 
     return a / divisor; }
@@ -318,6 +320,28 @@ inline rtype testFunction(vtype const& f, vtype const& a, vtype const& b) {
 }
 RT referenceFunction(ST f, ST a, ST b) { return f != 0 ? a/b : a; }
 #define USE_FLAG
+
+#elif testcase == 20    // store_a
+inline rtype testFunction(vtype const& a, vtype const& b) { 
+    union {             // make aligned array
+        ST y[vtype::size()];
+        vtype dummy;
+    } aligned = {0};
+    a.store_a(aligned.y);
+    return vtype().load_a(aligned.y);
+}
+RT referenceFunction(ST a, ST b) { return  a; }
+
+#elif testcase == 21    // store_nt
+inline rtype testFunction(vtype const& a, vtype const& b) { 
+    union {             // make aligned array
+        ST y[vtype::size()];
+        vtype dummy;
+    } aligned = {0};
+    a.store_nt(aligned.y);
+    return vtype().load_a(aligned.y);
+}
+RT referenceFunction(ST a, ST b) { return  a; }
 
 
 // ----------------------------------------------------------------------------
@@ -521,7 +545,9 @@ RT referenceFunction(ST a, ST b) {
 #elif testcase == 400    // horizontal_add
 #define SCALAR_RESULT
 #define FACCURACY 4      // accept accumulating rounding errors
-inline rtype testFunction(vtype const& a, vtype const& b) { return horizontal_add(b); }
+inline rtype testFunction(vtype const& a, vtype const& b) { 
+    return rtype(horizontal_add(b)); 
+}
 RT referenceFunction(vtype const& a, vtype const& b) {
     ST sum = 0;
     for (int i = 0; i < b.size(); i++) sum += b[i];
@@ -1555,7 +1581,9 @@ inline bool compare_scalars<double>(double const a, double const b) {
 #ifdef FACCURACY     // accept minor difference
     double dif = std::fabs(a - b) / delta_unit(a);
     if (dif <= FACCURACY) return true;
-    printf("\n%.0f ULP ", dif);
+    //!!
+    //printf("\n!! a = %G, b=%G, delta = %G, dif=%G ", a, b, delta_unit(a), dif);
+    //printf("\n%.0G ULP ", dif);
 #endif
     return false;
 }
@@ -1616,11 +1644,22 @@ int main() {
 #else
             // function under test:
             result = testFunction(a, b);
+
+            //!!
+            //if (result[0]!= result[1]) printf("\n#01: %G %G", result[0], result[1]);
+            //if (result[0] == 0.) printf("\n!0: %G %G", result[0], b[0]);
+
 #endif
 
             // expected value to compare with
 #if defined(SCALAR_RESULT) || defined(WHOLE_VECTOR)   // result is scalar || test whole vector
             expected = rtype(referenceFunction(a, b));
+
+            /*!!
+            if (fabs(result[0] - expected[0]) > fabs(result[0]*0.0000001)) {
+                printf("\nEE %G %G", result[0], expected[0]);
+            } */
+
             expectedList[0] = 0;   // avoid warning for unused
 #else       // result is vector
             for (int k = 0; k < vectorsize; k++) {
@@ -1638,12 +1677,12 @@ int main() {
                 if (++numerr == 1) {
                     printf("\ntest case %i:", testcase);  // print test case first time
                 }
-                //int numresult = result.size();     // number of elements in result vector
+                int numresult = result.size();     // number of elements in result vector
 #ifdef SCALAR_RESULT
-                //numresult = 1;
+                numresult = 1;
 #endif 
                 printf("\nError at %i, %i:", i, j);
-                for (int n = 0; n < result.size(); n++) {
+                for (int n = 0; n < numresult; n++) {
                     printf("\n"); printVal(a[i]); 
                     printf(", "); printVal(b[i]); printf(": "); 
                     if (compare_scalars(result[n], expected[n])) {
