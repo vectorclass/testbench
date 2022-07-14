@@ -1,8 +1,8 @@
 # Testbench files for Vector Class Library
 
-By Agner Fog, 2019-05-15
+By Agner Fog, 2022-07-14
 
-The testbench is a set of programs and scripts for testing the vector class library.
+This testbench is a set of programs and scripts for testing the vector class library.
 This is used during the development of VCL, but is not needed for programs that use VCL.
 
 The testbench includes the following files:
@@ -11,11 +11,13 @@ The testbench includes the following files:
 * testbench1.cpp: C++ program for testing general functions and operators.
 * testbench2.cpp: C++ program for testing permute, blend, lookup, gather, and scatter functions
 * testbench3.cpp: C++ program for testing mathematical functions.
+* testbench4.cpp: C++ program for testing vectors of half precision floating point numbers.
 * runtest.sh:     Bash script for doing multiple tests, based on a list of test cases
 * get_instruction_set.cpp: Used by runtest.sh for detecting the instruction set supported by the CPU
 * test1.lst:      List of test cases for testbench1.cpp
 * test2.lst:      List of test cases for testbench2.cpp
 * test3.lst:      List of test cases for testbench3.cpp
+* test4.lst:      List of test cases for testbench4.cpp
 * runcl32.bat:    Windows batch script for running runtest.sh under windows, using MS compiler, 32 bit mode
 * runcl64.bat:    Windows batch script for running runtest.sh under windows, using MS compiler, 64 bit mode
 * runicl64.bat:   Windows batch script for running runtest.sh under windows, using Intel compiler, 64 bit mode
@@ -52,7 +54,7 @@ General lines define a function or operator to test, and various parameters, sep
 2. Vector type for parameters
 3. Vector type for return value
 4. Instruction set (2=SSE2, 3=SSE3, 4=SSSE3, 5=SSE4.1, 6=SSE4.2, 7=AVX, 8=AVX2+FMA, 
-   9=AVX512F, 10=AVX512BW/DQ/VL
+   9=AVX512F, 10=AVX512BW/DQ/VL, 11=AVX512VBMI2, 12=AVX512_FP16
 5. Function name (only for permute etc.)
 6. List of indexes for permute, blend and gather functions. Separated by '+'
    (This will be converted to template parameters separated by ',')
@@ -67,11 +69,13 @@ Ranges can be specified for the following parameters:
 Special lines:
 
 A line beginning with a dollar sign ($) specifies a parameter:
-* $compiler= (1=Gnu, 2=Clang, 3=Intel for Linux or Mac, 10=Microsoft for Windows, 11=Intel for Windows)
+* $compiler= (1=Gnu, 2=Clang, 3=Intel Linux legacy, 4=Intel Linux clang-based, 10=MS windows, 11=Intel legacy windows)
 * $mode= (32 for 32-bit mode, 64 for 64-bit mode)
 * $testbench= (name of .cpp file)
 * $outfile= (name of output file)
 * $include= (directory where the .h include files of VCL can be found. May be relative path)
+* $emulator= (path and name of Intel emulator, to be called if instruction set not supported by current CPU)
+* $compilermax= (maximum instruction set supported by the compiler. skip test cases with higher instruction set)
 * $seed= (an integer for initializing the random number generator)
 
 Comments begin with '#'. The file must end with a blank line.
