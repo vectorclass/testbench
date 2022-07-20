@@ -1,7 +1,7 @@
-/****************************  testbench1.cpp   *******************************
+/****************************  testbench4.cpp   *******************************
 * Author:        Agner Fog
 * Date created:  2019-04-09
-* Last modified: 2022-07-16
+* Last modified: 2022-07-20
 * Version:       2.02.00
 * Project:       Testbench for vector class library
 * Description:
@@ -877,7 +877,7 @@ rtype referenceFunction(vtype a, vtype b) {
 #elif testcase == 505    // roundi
 inline rtype testFunction(vtype & a, vtype const& b) { 
     rtype r = roundi(a);
-    // work around problem with VCVTPH2W(INF) gives 0x8000 !!
+    // work around problem with VCVTPH2W(INF) gives 0x8000
     rtype r2 = select(r == rtype(-0x8000) && a > vtype(ST(0)), rtype(0x7FFF), r);
     return r2;
 }
@@ -904,7 +904,7 @@ RT referenceFunction(ST a, ST b) {
 #elif testcase == 506    // truncatei
 inline rtype testFunction(vtype const& a, vtype const& b) { 
     rtype r = truncatei(a);
-    // work around problem with vcvttps2dq VCVTPH2W(INF) gives 0x8000 !!
+    // work around problem with vcvttps2dq VCVTPH2W(INF) gives 0x8000
     rtype r2 = select(r == rtype(-0x8000) && a > vtype(ST(0)), rtype(0x7FFF), r);
     return r2;
 }
@@ -2063,13 +2063,6 @@ int main () {
     rtype result;                 // result vector
     rtype expected;               // expected result
     const int vectorsize = vtype::size();
-
-    /* !!
-    Vec8h aa(0.005523682), bb(0.005523682), pp;
-    pp = aa * bb;
-
-    printf("\n>>> %X %X %X \n\n", aa[0], bb[0], pp[0]);
-    */
 
 
 #if defined (__linux__) && !defined(__LP64__)
