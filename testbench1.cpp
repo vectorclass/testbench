@@ -1,8 +1,8 @@
 /****************************  testbench1.cpp   *******************************
 * Author:        Agner Fog
 * Date created:  2019-04-09
-* Last modified: 2020-02-23
-* Version:       2.01.01
+* Last modified: 2022-07-20
+* Version:       2.02.00
 * Project:       Testbench for vector class library
 * Description:
 * Compile and run this program to test operators and functions in VCL
@@ -36,7 +36,7 @@
 * Specify the desired instruction set and optimization options as parameters
 * to the compiler.
 *
-* (c) Copyright 2019 - 2020 Agner Fog.
+* (c) Copyright 2019 - 2022 Agner Fog.
 * Gnu general public license 3.0 https://www.gnu.org/licenses/gpl.html
 ******************************************************************************
 Test cases:
@@ -71,7 +71,17 @@ Test cases:
 109: operator ~
 110: andnot                (bool vectors only)
 200: sign_combine          (float types)
-201: square                (float types)
+202: square                (float types)
+
+//added. not in scripts yet:
+210: is_finite
+211: is_inf
+212: is_nan
+213: is_subnormal
+214: is_zero_or_subnormal
+220: infinite4f
+221: nan_vec (nan_code tested in testbench3)
+
 300: operator <
 301: operator <=
 302: operator ==
@@ -104,6 +114,13 @@ Test cases:
 512: to_double             (integer to double)
 513: to_float              (double to float)
 514: to_double             (float to double)
+
+//added. not in scripts yet:
+542: pow
+543: exp2
+
+544: fremainder
+545: fmodulo
 600: concatenate vectors (constructor with two parameters)
 601: concatenate boolean vectors (constructor with two parameters)
 602: get_low               (int or float vector)
@@ -114,14 +131,16 @@ Test cases:
 607: extend_low
 608: extend_high
 609: compress              (one integer parameter, vector size reduced)
-610: compress              (two integer parameters)
-611: compress_saturated    (two integer parameters, integer types)
-612: insert(index, value)
-613: extract(index)
-614: cutoff(index)
-615: load_partial(index, p)
-616: store_partial(index, p)
+610: compress_saturated    (one integer parameter, vector size reduced)
+611: compress              (two integer parameters, integer size reduced)
+612: compress_saturated    (two integer parameters, integer size reduced)
+620: insert(index, value)
+621: extract(index)
+622: cutoff(index)
+623: load_partial(index, p)
+624: store_partial(index, p)
 650: constructor with all elements
+
 
 *****************************************************************************/
 
@@ -136,7 +155,7 @@ Test cases:
 
 
 #ifndef INSTRSET
-#define INSTRSET 8           // desired instruction set
+#define INSTRSET 10          // desired instruction set
 #endif
 
 #include <vectorclass.h>     // vector class library
@@ -149,9 +168,10 @@ Test cases:
 
 #define testcase 1
 
-#define vtype Vec8f
+#define vtype Vec4f
 
 #define rtype vtype
+//#define rtype Vec32uc
 
 #define seed 1
 
@@ -225,9 +245,9 @@ inline rtype testFunction(vtype const& a, vtype const& b) {
     b0 = b[i];
     return a / b0; 
 }
-vtype referenceFunction(vtype a, vtype b) { 
-    vtype r;
-    for (int i = 0; i < a.size(); i++) {
+rtype referenceFunction(vtype a, vtype b) { 
+    rtype r(0);
+    for (int i = 0; i < r.size(); i++) {
         r.insert(i, a[i] / b0);
     }
     return r; } 
@@ -386,7 +406,7 @@ uint8_t  rotleft(uint8_t a, uint8_t b) { return a << b | a >> (8 - b); }
 uint16_t rotleft(uint16_t a, uint16_t b) { return a << b | a >> (16 - b); }
 uint32_t rotleft(uint32_t a, uint32_t b) { return a << b | a >> (32 - b); }
 uint64_t rotleft(uint64_t a, uint64_t b) { return a << b | a >> (64 - b); }
-int8_t   rotleft(int8_t a, int8_t b) { return rotleft(uint8_t(a), uint8_t(b)); }
+int8_t   rotleft(int8_t a,  int8_t b)  { return rotleft(uint8_t(a), uint8_t(b)); }
 int16_t  rotleft(int16_t a, int16_t b) { return rotleft(uint16_t(a), uint16_t(b)); }
 int32_t  rotleft(int32_t a, int32_t b) { return rotleft(uint32_t(a), uint32_t(b)); }
 int64_t  rotleft(int64_t a, int64_t b) { return rotleft(uint64_t(a), uint64_t(b)); }
@@ -487,10 +507,128 @@ RT referenceFunction(ST a, ST b) {
     return signbit_(b) ? -a : a;
 }
 
-#elif testcase == 201    // square
+#elif testcase == 202    // square
 inline rtype testFunction(vtype const& a, vtype const& b) { return square(b); }
 RT referenceFunction(ST a, ST b) {
     return b * b;
+}
+
+#elif testcase == 210    // is_finite
+inline rtype testFunction(vtype const& a, vtype const& b) { return is_finite(a); }
+RT referenceFunction(ST a, ST b) {
+    union {
+        ST f;
+        uint32_t i;
+        uint64_t q;
+    } ua;
+    ua.f = a;
+    if (vtype::elementtype() == 16) {
+        return (ua.i & 0x7F800000) != 0x7F800000;    
+    }
+    if (vtype::elementtype() == 17) {
+        return (ua.i & 0x7FF0000000000000) != 0x7FF0000000000000;
+    }
+    return 0; // wrong type
+}
+
+#elif testcase == 211    // is_inf
+inline rtype testFunction(vtype const& a, vtype const& b) { return is_inf(a); }
+RT referenceFunction(ST a, ST b) {
+    union {
+        ST f;
+        uint32_t i;
+        uint64_t q;
+    } ua;
+    ua.f = a;
+    if (vtype::elementtype() == 16) {
+        return (ua.i & 0x7FFFFFFF) == 0x7F800000;    
+    }
+    if (vtype::elementtype() == 17) {
+        return (ua.i & 0x7FFFFFFFFFFFFFFF) == 0x7FF0000000000000;
+    }
+    return 0; // wrong type
+}
+
+#elif testcase == 212    // is_nan
+inline rtype testFunction(vtype const& a, vtype const& b) { return is_nan(a); }
+RT referenceFunction(ST a, ST b) {
+    union {
+        ST f;
+        uint32_t i;
+        uint64_t q;
+    } ua;
+    ua.f = a;
+    if (vtype::elementtype() == 16) {
+        return (ua.i & 0x7FFFFFFF) > 0x7F800000;    
+    }
+    if (vtype::elementtype() == 17) {
+        return (ua.i & 0x7FFFFFFFFFFFFFFF) > 0x7FF0000000000000;
+    }
+    return 0; // wrong type
+}
+
+#elif testcase == 213    // is_subnormal
+inline rtype testFunction(vtype const& a, vtype const& b) { return is_subnormal(a); }
+RT referenceFunction(ST a, ST b) {
+    union {
+        ST f;
+        uint32_t i;
+        uint64_t q;
+    } ua;
+    ua.f = a;
+    if (vtype::elementtype() == 16) {
+        return (ua.i & 0x7F800000) == 0 && (ua.i & 0x007FFFFF) != 0;    
+    }
+    if (vtype::elementtype() == 17) {
+        return (ua.i & 0x7FF0000000000000) == 0 && (ua.i & 0x000FFFFFFFFFFFFF) != 0;
+    }
+    return 0; // wrong type
+}
+
+#elif testcase == 214    // is_zero_or_subnormal
+inline rtype testFunction(vtype const& a, vtype const& b) { return is_zero_or_subnormal(a); }
+RT referenceFunction(ST a, ST b) {
+    union {
+        ST f;
+        uint32_t i;
+        uint64_t q;
+    } ua;
+    ua.f = a;
+    if (vtype::elementtype() == 16) {
+        return (ua.i & 0x7F800000) == 0;
+    }
+    if (vtype::elementtype() == 17) {
+        return (ua.i & 0x7FF0000000000000) == 0;
+    }
+    return 0; // wrong type
+}
+
+#elif testcase == 220    // infinite4f
+inline rtype testFunction(vtype const& a, vtype const& b) { return infinite4f(); }
+RT referenceFunction(ST a, ST b) {
+    union {
+        ST f;
+        uint32_t i;
+        uint64_t q;
+    } ua;
+    ua.q = 0;
+    if (vtype::elementtype() == 16) ua.i = 0x7F800000;
+    if (vtype::elementtype() == 17) ua.q = 0x7FF0000000000000;
+    return ua.f;
+}
+  
+#elif testcase == 221    // nan_vec
+inline rtype testFunction(vtype const& a, vtype const& b) { return nan_vec<vtype>(5); }
+RT referenceFunction(ST a, ST b) {
+    union {
+        ST f;
+        uint32_t i;
+        uint64_t q;
+    } ua;
+    ua.q = 0;
+    if (vtype::elementtype() == 16) ua.i = 0x7FC00005;
+    if (vtype::elementtype() == 17) ua.q = 0x7FF8000000000005;
+    return ua.f;
 }
 
 
@@ -921,6 +1059,100 @@ rtype referenceFunction(vtype const& a, vtype const& b) {
 }
 #define WHOLE_VECTOR    // test whole vector
 
+#elif testcase == 542    // pow_n
+inline rtype testFunction(vtype const& a, vtype const& b) { return pow(a, 6); }
+RT referenceFunction(ST a, ST b) {
+    RT a2 = a*a;
+    RT a4 = a2*a2;
+    return a2*a4;
+} 
+
+#elif testcase == 543    // exp2
+inline rtype testFunction(vtype const& a, vtype const& b) { return exp2(a); }
+RT referenceFunction(ST a, ST b) {
+    return pow(2.f, a);
+}
+
+#elif testcase == 544    // fremainder
+double d0;
+
+inline rtype testFunction(vtype const& a, vtype const& b) { 
+    ST d = a[0];
+    if (d <= 0) {
+        d0 = 0;
+        return 0;
+    }
+    if (d < 0) d = -d;
+    if (!(d > 0)) d = 6.28318530718;
+    d0 = d;
+    vtype cc = b;
+    //cc *= 1000.;
+    rtype r = fremainder(cc, d); 
+    return r;
+}
+RT referenceFunction(ST a, ST b) {    
+    if (d0 <= 0) return 0;
+    ST cc = b;
+    //cc *= 1000.;
+    ST r = remainder(cc, d0);
+    if (r < -0.5*d0) r += d0;
+    if (r >= 0.5*d0) r -= d0;
+    return r;
+}
+#define FACCURACY 1      // accept rounding errors
+
+
+#elif testcase == 545    // fmodulo
+double d0;
+
+inline rtype testFunction(vtype const& a, vtype const& b) { 
+    ST d = a[0];
+    if (d <= 0) {
+        d0 = 0;
+        return 0;
+    }
+    if (d < 0) d = -d;
+    if (!(d > 0)) d = 6.28318530718;
+    d0 = d;
+    vtype cc = b;
+    //cc *= 1000.;
+    rtype r = fmodulo(cc, d); 
+    return r;
+}
+RT referenceFunction(ST a, ST b) {    
+    if (d0 <= 0) return 0;
+    ST cc = b;
+    //cc *= 1000.;
+    ST r = fmod(cc, d0);
+    if (r < 0) r += d0;
+   // if (r >= d0) r -= d0;
+    return r;
+}
+#define FACCURACY 1      // accept rounding errors
+
+
+ #elif testcase == 546    // fremainder
+double d0;
+
+inline rtype testFunction(vtype const& a, vtype const& b) { 
+    ST d = a[0];
+    if (d < 0) d = -d;
+    if (!(d > 0)) d = 6.28318530718;
+    d0 = d;
+
+    d0 = 6.28318530718;
+
+    vtype cc = b;
+    //cc *= 1000.;
+    rtype r = fmodulo(cc, d0); 
+    return r;
+}
+RT referenceFunction(ST a, ST b) {    
+    return fmod(b,d0);
+}
+#define FACCURACY 1000      // accept rounding errors
+
+
 
 // ----------------------------------------------------------------------------
 //             Functions without element-to-element correspondence
@@ -1083,7 +1315,7 @@ rtype referenceFunction(vtype const& a, vtype const& b) {
     return rtype().load(elements);
 }
 
-#elif testcase == 609   // compress (vector size halved
+#elif testcase == 609   // compress (vector size halved)
 inline rtype testFunction(vtype const& a, vtype const& b) { return compress(b); }
 rtype referenceFunction(vtype const& a, vtype const& b) {
     RT elements[vtype::size()];
@@ -1094,7 +1326,31 @@ rtype referenceFunction(vtype const& a, vtype const& b) {
 }
 #define WHOLE_VECTOR    // test whole vector
 
-#elif testcase == 610   // compress (signed, unsigned, and float)
+#elif testcase == 610   // compress_saturated (vector size halved)
+inline rtype testFunction(vtype const& a, vtype const& b) { 
+    return compress_saturated(b); 
+}
+rtype referenceFunction(vtype const& a, vtype const& b) {
+    ST elements1[sizeof(rtype) / sizeof(RT)];
+    RT elements2[sizeof(rtype) / sizeof(RT)];
+    b.store(elements1);
+    for (int i = 0; i < rtype::size(); i++) {
+        elements2[i] = (RT)elements1[i];
+        if (elements2[i] != elements1[i]) { // overflow. make saturation
+            if (RT(-1) < 0) { // signed type
+                elements2[i] = (RT(1) << (sizeof(RT) * 8 - 1)) - (elements1[i] > 0);
+            }
+            else { // unsigned type
+                elements2[i] = RT(-1);
+            }
+        }
+    }
+    return rtype().load(elements2);
+}
+#define WHOLE_VECTOR    // test whole vector
+
+
+#elif testcase == 611   // compress (two vectors. signed, unsigned, and float)
 #define WHOLE_VECTOR    // test whole vector, not individual elements
 inline rtype testFunction(vtype const& a, vtype const& b) { return compress(a, b); }
 rtype referenceFunction(vtype const& a, vtype const& b) {
@@ -1104,7 +1360,7 @@ rtype referenceFunction(vtype const& a, vtype const& b) {
     return rtype().load(elements);
 }
 
-#elif testcase == 611   // compress_saturated (signed, unsigned)
+#elif testcase == 612   // compress_saturated (two vectors. signed, unsigned)
 #define WHOLE_VECTOR    // test whole vector, not individual elements
 inline rtype testFunction(vtype const& a, vtype const& b) { return compress_saturated(a, b); }
 rtype referenceFunction(vtype const& a, vtype const& b) {
@@ -1125,7 +1381,7 @@ rtype referenceFunction(vtype const& a, vtype const& b) {
     return rtype().load(elements2);
 }
 
-#elif testcase == 612   // insert (index, value)
+#elif testcase == 620   // insert (index, value)
 #define WHOLE_VECTOR    // test whole vector, not individual elements
 
 inline rtype testFunction(vtype const& a, vtype const& b) { 
@@ -1142,7 +1398,7 @@ rtype referenceFunction(vtype const& a, vtype const& b) {
     return rtype().load(aa);
 }
 
-#elif testcase == 613   // extract(index)
+#elif testcase == 621   // extract(index)
 #define WHOLE_VECTOR    // test whole vector, not individual elements
 
 inline rtype testFunction(vtype const& a, vtype const& b) { 
@@ -1157,7 +1413,7 @@ rtype referenceFunction(vtype const& a, vtype const& b) {
     return rtype(aa[index]);
 } 
 
-#elif testcase == 614   // cutoff(index)
+#elif testcase == 622   // cutoff(index)
 #define WHOLE_VECTOR    // test whole vector, not individual elements
 
 inline rtype testFunction(vtype const& a, vtype const& b) { 
@@ -1173,7 +1429,7 @@ rtype referenceFunction(vtype const& a, vtype const& b) {
     return rtype().load(aa);
 } 
 
-#elif testcase == 615   // load_partial(index, p)
+#elif testcase == 623   // load_partial(index, p)
 #define WHOLE_VECTOR    // test whole vector, not individual elements
 
 inline rtype testFunction(vtype const& a, vtype const& b) { 
@@ -1192,7 +1448,7 @@ rtype referenceFunction(vtype const& a, vtype const& b) {
     return y.cutoff(index);
 } 
 
-#elif testcase == 616   // store_partial(index, p)
+#elif testcase == 624   // store_partial(index, p)
 #define WHOLE_VECTOR    // test whole vector, not individual elements
 
 inline rtype testFunction(vtype const& a, vtype const& b) { 
@@ -1493,7 +1749,7 @@ public:
                 }
             }
         }
-        else {
+        else if (vtype::elementtype() > 3) {
             // integer type
             // fill boundary data into array
             for (i = 0; i < 6; i++) {
@@ -1506,6 +1762,13 @@ public:
             }
             // fill random data into rest of array
             for (; i < listsize; i++) {
+                list[i] = get_random<T>(ran);
+            }
+        }
+        else {
+            // boolean type
+            // fill random data into array
+            for (i = 0; i < listsize; i++) {
                 list[i] = get_random<T>(ran);
             }
         }
@@ -1570,7 +1833,7 @@ inline bool compare_scalars<float>(float const a, float const b) {
 #ifdef FACCURACY     // accept minor difference
     float dif = std::fabs(a - b) / delta_unit(a);
     if (dif <= FACCURACY) return true;
-    printf("\n%.0f ULP ", dif);
+    printf("\n%6.3G ULP ", dif);
 #endif
     return false;
 }
@@ -1581,9 +1844,7 @@ inline bool compare_scalars<double>(double const a, double const b) {
 #ifdef FACCURACY     // accept minor difference
     double dif = std::fabs(a - b) / delta_unit(a);
     if (dif <= FACCURACY) return true;
-    //!!
-    //printf("\n!! a = %G, b=%G, delta = %G, dif=%G ", a, b, delta_unit(a), dif);
-    //printf("\n%.0G ULP ", dif);
+    printf("\n%6.3G ULP ", dif);
 #endif
     return false;
 }
@@ -1602,7 +1863,7 @@ inline bool compare_vectors(T const& a, T const& b) {
 
 // program entry
 int main() {
-    vtype a, b;                   // operand vectors
+    vtype a(ST(0)), b(ST(0));             // operand vectors
     rtype result;                 // result vector
     rtype expected;               // expected result
     const int vectorsize = vtype::size();
@@ -1645,20 +1906,11 @@ int main() {
             // function under test:
             result = testFunction(a, b);
 
-            //!!
-            //if (result[0]!= result[1]) printf("\n#01: %G %G", result[0], result[1]);
-            //if (result[0] == 0.) printf("\n!0: %G %G", result[0], b[0]);
-
 #endif
 
             // expected value to compare with
 #if defined(SCALAR_RESULT) || defined(WHOLE_VECTOR)   // result is scalar || test whole vector
             expected = rtype(referenceFunction(a, b));
-
-            /*!!
-            if (fabs(result[0] - expected[0]) > fabs(result[0]*0.0000001)) {
-                printf("\nEE %G %G", result[0], expected[0]);
-            } */
 
             expectedList[0] = 0;   // avoid warning for unused
 #else       // result is vector
@@ -1683,8 +1935,8 @@ int main() {
 #endif 
                 printf("\nError at %i, %i:", i, j);
                 for (int n = 0; n < numresult; n++) {
-                    printf("\n"); printVal(a[i]); 
-                    printf(", "); printVal(b[i]); printf(": "); 
+                    printf("\n"); printVal(a[n]); 
+                    printf(", "); printVal(b[n]); printf(": "); 
                     if (compare_scalars(result[n], expected[n])) {
                         printf("-> %2i:  ", n);   // elements are equal
                         printVal(result[n]);
