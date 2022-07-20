@@ -3,24 +3,34 @@
 # Use:
 # ./runtest.sh test3.lst
 
-# choose compiler:
-$compiler=1
+# choose compiler
+$compiler=3
+
+# maximum instruction set supported by this compiler
+$compilermax=11
+
+# set mode
 $mode=64
 
-# path to testbench program
-$testbench=testbench3.cpp
+# testbench file:
+#$testbench=../testbench3/testbench3.cpp
+$testbench=/mnt/c/_Public/VectorClass/testbench3/testbench3.cpp
 
-# path to vectorclass.h include files
-$include=./
+# directory for include files
+#$include=../src2
+$include=/mnt/c/_Public/VectorClass/src2
 
-# output file
+# Intel emulator
+$emulator=/home/agner/emulator/sde/sde
+
+# output file name
 $outfile=test3.txt
 
-# random number seed
+# seed for random number generator
 $seed=1
 
+# List test cases:
 
-# Each line contains the following parameters, separated by commas:
 # test case, vector type, return type, instruction set, function name, indexes
 
 1 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10 ,  # round
@@ -76,7 +86,6 @@ $seed=1
 
 # not in vectormat_lib.h version with MS compiler:
 202 203 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10   # sincos
-
 204 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # tan
 205 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # asin
 206 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # acos
@@ -92,3 +101,4 @@ $seed=1
 500 501 502 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10  # pow
 510 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # atan2
 511 512 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10   # maximum, minimum
+

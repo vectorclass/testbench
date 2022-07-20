@@ -1,0 +1,54 @@
+# Test data for VCL test bench
+# This list contains test cases for half-precision floating point vectors
+# Use:
+# ./runtest.sh test4.lst
+
+# choose compiler
+$compiler=1
+
+# maximum instruction set supported by this compiler
+$compilermax=11
+
+# set mode
+$mode=64
+
+# testbench file:
+#$testbench=../testbench4/testbench4.cpp
+$testbench=/mnt/c/_Public/VectorClass/testbench4/testbench4.cpp
+
+# directory for include files
+#$include=../src2
+$include=/mnt/c/_Public/VectorClass/src2
+
+# Intel emulator
+$emulator=/home/agner/emulator/sde/sde
+
+# output file name
+$outfile=test4.txt
+
+# seed for random number generator
+$seed=1
+
+# List test cases:
+
+# test case, vector type, return type, instruction set
+
+# floating point types
+1 2 3 4 8 9 10 11 12 13 14 15 16 17 18 200 201 202 , Vec8h Vec16h Vec32h , , 2 7 8 9 10 12
+
+612 613 614 615 616 , Vec8h Vec16h Vec32h , , 2 7 8 9 10 12
+
+# boolean result
+210 211 212 213 214 300 301 302 303 304 305 306 , Vec8h  , Vec8hb  , 2 7 8 9 10 12
+210 211 212 213 214 300 301 302 303 304 305 306 , Vec16h , Vec16hb , 2 7 8 9 10 12
+210 211 212 213 214 300 301 302 303 304 305 306 , Vec32h , Vec32hb , 2 7 8 9 10 12
+
+#integer result
+505 506 540 , Vec8h  , Vec8s  , 2 7 8 9 10 12
+505 506 540 , Vec16h , Vec16s , 2 7 8 9 10 12
+505 506 540 , Vec32h , Vec32s , 2 7 8 9 10 12
+
+# math
+507 508 509 510 519 520 521 530 531 532 541 , Vec8h Vec16h Vec32h , , 2 7 8 9 10 12
+
+542 550 551 552 553 560 561 562 563 570 571 572 573 , Vec8h Vec16h Vec32h , , 2 7 8 9 10 12

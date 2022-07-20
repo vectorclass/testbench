@@ -2,12 +2,12 @@
 # runtest.sh
 # Author:        Agner Fog
 # Date created:  2019-06-02
-# Last modified: 2019-09-12
+# Last modified: 2022-07-14
 # 
 # This script will compile and run a testbench for the C++ Vector Class Library
 # Using a list of test cases.
 #
-# (c) Copyright 2019 by Agner Fog. 
+# (c) Copyright 2019-2022 by Agner Fog. 
 # GNU General Public License 3.0 or later www.gnu.org/licenses
 #
 ###############################################################################
@@ -23,7 +23,7 @@
 # 2. Vector type for parameters
 # 3. Vector type for return value
 # 4. Instruction set (2=SSE2, 3=SSE3, 4=SSSE3, 5=SSE4.1, 6=SSE4.2, 7=AVX, 
-#    8=AVX2+FMA, 9=AVX512F, 10=AVX512BW/DQ/VL
+#    8=AVX2+FMA, 9=AVX512F, 10=AVX512BW/DQ/VL, 11=AVX512VBMI2, 12=AVX512_FP16
 # 5. Function name (only for permute etc.)
 # 6. List of indexes for permute, blend and gather functions. Separated by '+'
 #    (will be converted to template parameters separated by ',')
@@ -37,12 +37,15 @@
 #
 # Special lines:
 # A line beginning with a dollar sign ($) specifies a parameter:
-# $compiler= (1=Gnu, 2=Clang, 3=Intel for Linux, 
-#            10=Microsoft for Windows, 11=Intel for Windows)
+# $compiler= (1=Gnu, 2=Clang, 
+#             3=Intel compiler for Linux, legacy, 4=Intel compiler for Linux, clang based
+#            10=Microsoft compiler for Windows, 11=Intel compiler for Windows, legacy)
 # $mode= (32 for 32-bit mode, 64 for 64-bit mode)
-# $testbench= (name of .cpp file)
+# $testbench= (name of .cpp testbench file)
 # $outfile= (name of output file)
 # $include= (directory of .h include files. May be relative path)
+# $emulator= (path and name of Intel emulator, to be called if instruction set not supported by current CPU)
+# $compilermax= (maximum instruction set supported by the compiler. skip test cases with higher instruction set)
 # $seed= (an integer for initializing random number generator)
 #
 # Comments begin with '#'
@@ -56,20 +59,19 @@ extraoptions=""
 # This fixes some bugs in gcc with testcase 5, Vec16c, instruction set 10:
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65782
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=89325
-gccextraoptions="-fno-asynchronous-unwind-tables -Wno-attributes"
+# Not needed in latest releases:
+# gccextraoptions="-fno-asynchronous-unwind-tables -Wno-attributes"
 
 # Default name for compiled file
 exefilename="x"
-
 
 # Uncomment this line if wrong operating system is detected:
 # OSTYPE="cygwin"
 
 # Detect operating system
-if [[ $OSTYPE == "cygwin" ]] ; then
-  os=1  # Windows/Cygwin
+if [[ $OSTYPE == "cygwin" || $OSTYPE == "msys" ]] ; then
+  os=1  # Windows/Cygwin/Msys-Mingw
   gccextraoptions="-fno-asynchronous-unwind-tables -Wno-attributes" # workaround for cygwin problems
-  clangextraoptions="-lm"
   exefilename="xx.exe"  # avoid same name as ELF exe file because they can be messed up
   echo -e "Operating system is Windows\n\n"
 elif [[ $OSTYPE == "linux-gnu" ]] ; then
@@ -114,11 +116,6 @@ compileAndRun() {
     parf=""
   fi
   
-  # check if instruction set is supported
-  if [[ $instrset -gt $maxiset ]] ; then
-    instrset=$maxiset
-  fi
-
   # compiler parameters
   parameters="-Dtestcase=$testcase $parf -Dvtype=$vtype -Drtype=$rtype -DINSTRSET=$instrset -Dseed=$seed"
 
@@ -147,11 +144,15 @@ compileAndRun() {
   elif [[ $instrset -eq 7 ]] ; then
     isetoption=-mavx
   elif [[ $instrset -eq 8 ]] ; then
-    isetoption="-mfma -mavx2"
+    isetoption="-mfma -mavx2 -mf16c "
   elif [[ $instrset -eq 9 ]] ; then
-    isetoption="-mfma -mavx512f"
+    isetoption="-mfma -mavx512f -mf16c "
   elif [[ $instrset -eq 10 ]] ; then
-    isetoption="-mfma -mavx512bw -mavx512dq -mavx512vl"
+    isetoption="-mfma -mavx512bw -mavx512dq -mavx512vl -mf16c "
+  elif [[ $instrset -eq 11 ]] ; then
+    isetoption="-mfma -mavx512bw -mavx512dq -mavx512vl -mf16c -mavx512vbmi -mavx512vbmi2 "
+  elif [[ $instrset -eq 12 ]] ; then
+    isetoption="-mfma -mavx512bw -mavx512dq -mavx512vl -mf16c -mavx512vbmi -mavx512vbmi2 -mavx512fp16 "
   fi
   
   # call compiler
@@ -171,15 +172,30 @@ compileAndRun() {
       eval clang $parameters $options $isetoption -I$include $testbench $parix $extraoptions $clangextraoptions
 
   elif [ $compiler -eq 3 ] ; then
-      # Intel compiler for Linux
+      # Intel compiler for Linux, legacy
       echo "icc $parameters $options $isetoption -I$include $testbench $parix $extraoptions"
       eval icc $parameters $options $isetoption -I$include $testbench $parix $extraoptions
+      
+  elif [ $compiler -eq 4 ] ; then
+      # Intel compiler for Linux, clang based
+      echo "icpx $parameters $options $isetoption -I$include $testbench $parix $extraoptions"
+      eval icpx $parameters $options $isetoption -I$include $testbench $parix $extraoptions    
     
   elif [ $compiler -eq 10 ] ; then
       # MS compiler
+      # instruction set options
+      if [[ $instrset -le 7 ]] ; then
+        isetoption=/arch:AVX
+      elif [[ $instrset -eq 8 ]] ; then
+        isetoption=/arch:AVX2
+      elif [[ $instrset -eq 9 ]] ; then
+        isetoption=/arch:AVX512
+      elif [[ $instrset -eq 10 ]] ; then
+        isetoption=/arch:AVX512
+      fi
       parameters="/D testcase=$testcase /D vtype=$vtype /D rtype=$rtype /D INSTRSET=$instrset /D funcname=$funcname"
-      echo cl.exe "$options $parameters /I$include $testbench /D indexes=$inx2 $extraoptions"
-      eval cl.exe "$options $parameters /I$include $testbench /D indexes=$inx2 $extraoptions"
+      echo cl.exe "$options $parameters /I$include $testbench $isetoption /D indexes=$inx2 $extraoptions"
+      eval cl.exe "$options $parameters /I$include $testbench $isetoption /D indexes=$inx2 $extraoptions"
       
   elif [ $compiler -eq 11 ] ; then
       # Intel compiler for Windows
@@ -219,8 +235,20 @@ compileAndRun() {
     exit 2    # exit
   fi
   
-  # run compiled program
-  ./$exefilename
+  # check if instruction set is supported
+  if [[ $instrset -gt $maxiset ]] ; then
+    if [ -e "$emulator" ] ; then
+      # emulate and run compiled program
+      $emulator -future -- ./$exefilename
+    else
+      echo "*** emulator $emulator not found\n"
+      echo "*** emulator $emulator not found\n" >> $outfile
+      exit 2    # exit    
+    fi
+  else
+    # run compiled program
+    ./$exefilename  
+  fi
   
   returncode=$?
 
@@ -242,8 +270,11 @@ setCompiler() {
     # Clang compiler
     options="-m$mode -std=c++17 -O3 -fno-trapping-math -o$exefilename"
   elif [ $compiler -eq 3 ] ; then
-    # Intel compiler for Linux
+    # Intel compiler for Linux, legacy
     options="-m$mode -std=c++17 -O3 -fno-trapping-math -fp-model precise -o$exefilename"    
+  elif [ $compiler -eq 4 ] ; then
+    # Intel compiler for Linux, clang based
+    options="-m$mode -std=c++17 -O3 -fno-trapping-math -fp-model precise -o$exefilename"
   elif [ $compiler -eq 10 ] ; then
     # MS compiler for Windows VS2019
     os=1
@@ -264,22 +295,38 @@ getInstructionSet() {
   if [ $compiler -eq 1 ] ; then
       # Gnu compiler
       eval g++ -msse2 -std=c++17 -I$include get_instruction_set.cpp -oiset$exefilename
+      g++ --version
+      g++ --version >> $outfile
       
   elif [ $compiler -eq 2 ] ; then
       # Clang compiler
       eval clang -msse2 -std=c++17 -I$include get_instruction_set.cpp -oiset$exefilename
+      clang --version
+      clang --version >> $outfile
     
   elif [ $compiler -eq 3 ] ; then
-      # Intel compiler for Linux
+      # Intel compiler for Linux, legacy
       eval icc -std=c++17 -I$include get_instruction_set.cpp -oiset$exefilename
+      icc --version
+      icc --version >> $outfile
+
+  elif [ $compiler -eq 4 ] ; then
+      # Intel compiler for Linux, clang based
+      eval icpx -std=c++17 -I$include get_instruction_set.cpp -oiset$exefilename
+      icpx --version
+      icpx --version >> $outfile
 
   elif [ $compiler -eq 10 ] ; then
       # MS compiler for Windows
       eval cl.exe -I$include /std:c++17 get_instruction_set.cpp /Fe:iset$exefilename
+      cl.exe
+      cl.exe >> $outfile
           
   elif [ $compiler -eq 11 ] ; then
       # Intel compiler for Windows
       eval icl.exe -I$include /std:c++17 get_instruction_set.cpp /Fe:iset$exefilename
+      icl --version
+      icl --version >> $outfile
       
   else
       echo "Error: Unknown compiler" 
@@ -376,7 +423,7 @@ do
         echo "Error: Wrong mode: $mode" >> $outfile
         exit 1
       fi  
-	  setCompiler "$compiler"
+	   setCompiler "$compiler"
     elif [[ $varname == "testbench" ]] ; then
       # set testbench file
       testbench=$value   
@@ -386,6 +433,12 @@ do
     elif [[ $varname == "compiler" ]] ; then
       # set compiler
       setCompiler $value
+    elif [[ $varname == "emulator" ]] ; then
+      # set emulator
+      emulator=$value
+    elif [[ $varname == "compilermax" ]] ; then
+      # set compilermax
+      compilermax=$value      
     elif [[ $varname == "seed" ]] ; then
       # set compiler
       seed=$value
@@ -480,6 +533,14 @@ do
         
         # write to file
         echo -e "   test case $testcase $funcname, vector $vtype, instruction set $instrset, $testbench\n" >> $outfile
+        
+        # compilermax
+        if [[ ! -z $compilermax ]] ; then
+          if [[ $instrset -gt $compilermax ]] ; then
+            echo -e "- skipped\n" >> $outfile
+            continue
+          fi
+        fi          
 
         # compile testbench and run it
         compileAndRun

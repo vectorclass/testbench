@@ -3,13 +3,33 @@
 # Use:
 # ./runtest.sh test1.lst
 
-$compiler=1
+# choose compiler
+$compiler=3
+
+# maximum instruction set supported by this compiler
+$compilermax=11
+
+# set mode
 $mode=64
-$testbench=../testbench1/testbench1.cpp
-$include=../src2
+
+# testbench file:
+#$testbench=../testbench1/testbench1.cpp
+$testbench=/mnt/c/_Public/VectorClass/testbench1/testbench1.cpp
+
+# directory for include files
+#$include=../src2
+$include=/mnt/c/_Public/VectorClass/src2
+
+# Intel emulator
+$emulator=/home/agner/emulator/sde/sde
+
+# output file name
 $outfile=test1.txt
+
+# seed for random number generator
 $seed=1
 
+# List test cases:
 
 # test case, vector type, return type, instruction set
 
@@ -54,7 +74,7 @@ $seed=1
 105 , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q  , , 8 9 10
 
 # floating point types
-1 2 3 4 8 9 10 11 12 13 14 15 16 17 200 201 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 9 10
+1 2 3 4 8 9 10 11 12 13 14 15 16 17 200 202 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 9 10
 
 # boolean result types
 300 301 302 303 304 305 306 , Vec2d , Vec2db           , 3 8 9 10
@@ -138,6 +158,11 @@ $seed=1
 513 , Vec8d , Vec8f , 4 7 8 9 10
 514 , Vec4f , Vec4d , 5 7 8 10
 514 , Vec8f , Vec8d , 5 7 8 10
+
+# to do: 542 pow, 543 exp2
+ 
+# fmodulo, fremainder
+544 545 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 6 8 10
 
 # concatenate vectors
 600 , Vec16c , Vec32c  , 2 4 8 10
@@ -229,65 +254,62 @@ $seed=1
 607 608 , Vec16f , Vec8d  , 4 9 10
 
 # compress. reduce vector size
-609 , Vec16s  , Vec16c  , 3 7 8 9 10
-609 , Vec16us , Vec16uc , 4 8
-609 , Vec8i   , Vec8s   , 3 8 9 10
-609 , Vec8ui  , Vec8us  , 4 7 8 9
-609 , Vec4q   , Vec4i   , 3 8 10
-609 , Vec4uq  , Vec4ui  , 3 8 10
-609 , Vec32s  , Vec32c  , 3 8 9 10
-609 , Vec32us , Vec32uc , 8 10
-609 , Vec16i  , Vec16s  , 3 8 10
-609 , Vec16ui , Vec16us , 4 9 10
-609 , Vec8q   , Vec8i   , 5 9 10
-609 , Vec8uq  , Vec8ui  , 6 8 10
+609 610 , Vec16s  , Vec16c  , 3 7 8 9 10
+609 610 , Vec16us , Vec16uc , 4 8
+609 610 , Vec8i   , Vec8s   , 3 8 9 10
+609 610 , Vec8ui  , Vec8us  , 4 7 8 9
+609 610 , Vec4q   , Vec4i   , 3 8 10
+609 610 , Vec4uq  , Vec4ui  , 3 8 10
+609 610 , Vec32s  , Vec32c  , 3 8 9 10
+609 610 , Vec32us , Vec32uc , 8 10
+609 610 , Vec16i  , Vec16s  , 3 8 10
+609 610 , Vec16ui , Vec16us , 4 9 10
+609 610 , Vec8q   , Vec8i   , 5 9 10
+609 610 , Vec8uq  , Vec8ui  , 6 8 10
 
-# compress with two parameters
-610 611  , Vec8s,   Vec16c  , 2 6 8 9 10
-610 611  , Vec16s,  Vec32c  , 4 9 10
-610 611  , Vec32s,  Vec64c  , 4 9 10
-610 611  , Vec4i,   Vec8s   , 4 9 10
-610 611  , Vec8i,   Vec16s  , 4 9 10
-610 611  , Vec16i,  Vec32s  , 4 9 10
-610 611  , Vec2q ,  Vec4i   , 4 9 10
-610 611  , Vec4q,   Vec8i   , 4 9 10
-610 611  , Vec8q,   Vec16i  , 4 9 10
-610 611  , Vec8us,  Vec16uc , 3 7 8 9 10
-610 611  , Vec16us, Vec32uc , 4 9 10
-610 611  , Vec32us, Vec64uc , 4 9 10
-610 611  , Vec4ui,  Vec8us  , 4 9 10
-610 611  , Vec8ui,  Vec16us , 4 9 10
-610 611  , Vec16ui, Vec32us , 4 9 10
-610 611  , Vec2uq,  Vec4ui  , 4 9 10
-610 611  , Vec4uq,  Vec8ui  , 4 9 10
-610 611  , Vec8uq,  Vec16ui , 4 9 10
-610      , Vec2d,   Vec4f   , 4 9 10
-610      , Vec4d,   Vec8f   , 4 9 10
-610      , Vec8d,   Vec16f  , 4 9 10
+# compress with two parameters. reduce precision
+611 612  , Vec8s,   Vec16c  , 2 6 8 9 10
+611 612  , Vec16s,  Vec32c  , 4 9 10
+611 612  , Vec32s,  Vec64c  , 4 9 10
+611 612  , Vec4i,   Vec8s   , 4 9 10
+611 612  , Vec8i,   Vec16s  , 4 9 10
+611 612  , Vec16i,  Vec32s  , 4 9 10
+611 612  , Vec2q ,  Vec4i   , 4 9 10
+611 612  , Vec4q,   Vec8i   , 4 9 10
+611 612  , Vec8q,   Vec16i  , 4 9 10
+611 612  , Vec8us,  Vec16uc , 3 7 8 9 10
+611 612  , Vec16us, Vec32uc , 4 9 10
+611 612  , Vec32us, Vec64uc , 4 9 10
+611 612  , Vec4ui,  Vec8us  , 4 9 10
+611 612  , Vec8ui,  Vec16us , 4 9 10
+611 612  , Vec16ui, Vec32us , 4 9 10
+611 612  , Vec2uq,  Vec4ui  , 4 9 10
+611 612  , Vec4uq,  Vec8ui  , 4 9 10
+611 612  , Vec8uq,  Vec16ui , 4 9 10
+611      , Vec2d,   Vec4f   , 4 9 10
+611      , Vec4d,   Vec8f   , 4 9 10
+611      , Vec8d,   Vec16f  , 4 9 10
 
 # insert
-612      , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q ,, 2 6 8 10
-612      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d ,, 2 6 8 10
+620      , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q ,, 2 6 8 10
+620      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d ,, 2 6 8 10
 
 # extract
-613      , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q ,, 2 6 8 10
-613      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d ,, 2 6 8 10
+621      , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s , , 2 6 8 10 11
+621      , Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q , , 2 6 8 10
+621      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 6 8 10
 
 # cutoff
-614      , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q ,, 2 6 8 10
-614      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d ,, 2 6 8 10
+622      , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q ,, 2 6 8 10
+622      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d ,, 2 6 8 10
 
 # load_partial
-615      , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q ,, 2 6 8 10
-615      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d ,, 2 6 8 10
+623      , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q ,, 2 6 8 10
+623      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d ,, 2 6 8 10
 
 # store_partial
-616      , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q ,, 2 6 8 10
-616      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d ,, 2 6 8 10
-
-
-### Only in version 2: ###
-##########################
+624      , Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec2q Vec4q Vec8q ,, 2 6 8 10
+624      , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d ,, 2 6 8 10
 
 # constructor with all elements
 650 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d Vec16c Vec32c Vec64c Vec8s Vec16s Vec32s Vec4i Vec8i Vec16i Vec16uc Vec32uc Vec64uc Vec8us Vec16us Vec32us Vec4ui Vec8ui Vec16ui Vec2q Vec4q Vec8q Vec2uq Vec4uq Vec8uq ,, 2 8 10
