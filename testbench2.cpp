@@ -1,8 +1,8 @@
 /****************************  testbench2.cpp   *******************************
 * Author:        Agner Fog
 * Date created:  2019-04-15
-* Last modified: 2019-08-02
-* Version:       2.00
+* Last modified: 2022-07-16
+* Version:       2.02.00
 * Project:       Testbench for vector class library, 2: permute functions etc.
 * Description:
 * Compile and run this program to test permute functions etc. in VCL
@@ -46,7 +46,7 @@
 * Specify the desired instruction set and optimization options as parameters
 * to the compiler.
 *
-* (c) Copyright Agner Fog 2019,
+* (c) Copyright Agner Fog 2019-2022
 * Gnu general public license 3.0 https://www.gnu.org/licenses/gpl.html
 ******************************************************************************
 Test cases:
@@ -71,7 +71,7 @@ Test cases:
 //#define __AVX512VBMI2__
 
 #ifndef INSTRSET
-#define INSTRSET      8      // desired instruction set
+#define INSTRSET    10      // desired instruction set
 #endif
 
 
@@ -82,15 +82,28 @@ Test cases:
 //            Specify input parameters here if running from an IDE
 // ----------------------------------------------------------------------------
 
-#define testcase 1
+#define testcase 2
 
-#define vtype Vec4i
+#define vtype Vec16c
 
 #define rtype vtype
 
-#define funcname permute4
+#define funcname blend16
 
-#define indexes  2,2,0,1
+//#define indexes  20,40,30,10, 1,0,-1,52 ,4,14,24,31, 11,12,14,11, 22,11,3,V_DC, 8,6,4,8, 0,11,11,11, 31,30,29,28, \
+//                 20,20,30,10, 1,0,-1,2 ,60,14,24,31, 11,12,14,11, 22,11,33,V_DC, 8,6,4,8, 0,11,11,11, 31,30,29,28
+//#define indexes  2,12,13,10, 1,0,15,11
+
+//#define indexes  1,0,3,2,5,4,7,6,9,8,11,10,13,12,15,14
+
+//#define indexes  1,0,3,2,5,4,7,6,9,8,11,10,13,12,15,14,17,16,19,18,21,20,23,22,25,24,27,26,29,28,31,30
+
+//#define indexes  1,0,3,2,5,4,7,6,9,8,11,10,13,12,15,14
+
+//#define indexes  1,0,3,2,5,4,7,6
+
+#define indexes  0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30
+
 
 #define seed 1
 
@@ -203,7 +216,6 @@ vtype compareFunction(vtype const& r, vtype const& a, vtype const&) {
 #elif   testcase == 2    // blend
 inline vtype testFunction(vtype const& a, vtype const& b) {
     vtype r = funcname<indexes>(a, b);          // call blend function
-    // r.insert(0, 99);
     return r;
 }
 
