@@ -4,7 +4,7 @@
 # ./runtest.sh test3.lst
 
 # choose compiler
-$compiler=3
+$compiler=1
 
 # maximum instruction set supported by this compiler
 $compilermax=11
@@ -83,13 +83,19 @@ $seed=1
 
 200 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # sin
 201 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # cos
-
-# not in vectormat_lib.h version with MS compiler:
+# sincos not in vectormat_lib.h version with MS compiler
 202 203 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10   # sincos
+
 204 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # tan
 205 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # asin
 206 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # acos
 207 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # atan
+
+210 211 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 5 7 8 10   # sinpi cospi
+214 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # tanpi
+
+# sincospi not in vectormat_lib.h
+212 213 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10   # sincospi
 
 300 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # sinh
 301 , Vec4f Vec8f Vec16f Vec2d Vec4d Vec8d , , 2 7 8 10       # cosh

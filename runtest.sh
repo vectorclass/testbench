@@ -2,7 +2,7 @@
 # runtest.sh
 # Author:        Agner Fog
 # Date created:  2019-06-02
-# Last modified: 2022-07-14
+# Last modified: 2022-07-26
 # 
 # This script will compile and run a testbench for the C++ Vector Class Library
 # Using a list of test cases.
@@ -32,16 +32,16 @@
 # 1. Test case: a range specified as values separated by spaces
 # 2. Vector type: Multiple vector types separted by spaces
 # 3. The type for return value cannot specify a range.
-#    Make it blank to get the same as the vector type for parameters
+#    Make it blank to get the same as the vector type for input parameters
 # 4. Instruction set: a range specified as values separated by spaces
 #
 # Special lines:
 # A line beginning with a dollar sign ($) specifies a parameter:
 # $compiler= (1=Gnu, 2=Clang, 
-#             3=Intel compiler for Linux, legacy, 4=Intel compiler for Linux, clang based
-#            10=Microsoft compiler for Windows, 11=Intel compiler for Windows, legacy)
+#             3=Intel compiler for Linux "classic", 4=Intel compiler for Linux, clang based
+#            10=Microsoft compiler for Windows, 11=Intel compiler for Windows "classic")
 # $mode= (32 for 32-bit mode, 64 for 64-bit mode)
-# $testbench= (name of .cpp testbench file)
+# $testbench= (name and path of .cpp testbench file)
 # $outfile= (name of output file)
 # $include= (directory of .h include files. May be relative path)
 # $emulator= (path and name of Intel emulator, to be called if instruction set not supported by current CPU)
@@ -55,6 +55,9 @@
 
 # Extra compiler options may be inserted here:
 extraoptions=""
+
+# Extra source files or library files may be inserted here:
+extrasource=""
 
 # This fixes some bugs in gcc with testcase 5, Vec16c, instruction set 10:
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65782
@@ -163,23 +166,23 @@ compileAndRun() {
       
   elif [ $compiler -eq 1 ] ; then
       # Gnu compiler
-      echo "g++ $parameters $isetoption $options -I$include $testbench $parix $gccextraoptions $extraoptions"
-      eval g++ $parameters $isetoption $options -I$include $testbench $gccextraoptions $parix $extraoptions
+      echo "g++ $parameters $isetoption $options -I$include $gccextraoptions $parix $extraoptions $testbench $extrasource"
+      eval g++ $parameters $isetoption $options -I$include $gccextraoptions $parix $extraoptions $testbench $extrasource
       
   elif [ $compiler -eq 2 ] ; then
       # Clang compiler
-      echo "clang $parameters $options $isetoption -I$include $testbench $parix $extraoptions $clangextraoptions"
-      eval clang $parameters $options $isetoption -I$include $testbench $parix $extraoptions $clangextraoptions
+      echo "clang++ $parameters $options $isetoption -I$include $parix $extraoptions $clangextraoptions $testbench $extrasource "
+      eval clang++ $parameters $options $isetoption -I$include $parix $extraoptions $clangextraoptions $testbench $extrasource
 
   elif [ $compiler -eq 3 ] ; then
       # Intel compiler for Linux, legacy
-      echo "icc $parameters $options $isetoption -I$include $testbench $parix $extraoptions"
-      eval icc $parameters $options $isetoption -I$include $testbench $parix $extraoptions
+      echo "$parameters $options $isetoption -I$include $parix $extraoptions $testbench $extrasource"
+      eval icc $parameters $options $isetoption -I$include $parix $extraoptions $testbench $extrasource
       
   elif [ $compiler -eq 4 ] ; then
       # Intel compiler for Linux, clang based
-      echo "icpx $parameters $options $isetoption -I$include $testbench $parix $extraoptions"
-      eval icpx $parameters $options $isetoption -I$include $testbench $parix $extraoptions    
+      echo "icpx $parameters $options $isetoption -I$include $testbench $parix $extraoptions $testbench $extrasource"
+      eval icpx $parameters $options $isetoption -I$include $testbench $parix $extraoptions $testbench $extrasource
     
   elif [ $compiler -eq 10 ] ; then
       # MS compiler
@@ -194,8 +197,8 @@ compileAndRun() {
         isetoption=/arch:AVX512
       fi
       parameters="/D testcase=$testcase /D vtype=$vtype /D rtype=$rtype /D INSTRSET=$instrset /D funcname=$funcname"
-      echo cl.exe "$options $parameters /I$include $testbench $isetoption /D indexes=$inx2 $extraoptions"
-      eval cl.exe "$options $parameters /I$include $testbench $isetoption /D indexes=$inx2 $extraoptions"
+      echo cl.exe "$options $parameters /I$include $testbench $isetoption /D indexes=$inx2 $extraoptions $testbench $extrasource"
+      eval cl.exe "$options $parameters /I$include $testbench $isetoption /D indexes=$inx2 $extraoptions $testbench $extrasource"
       
   elif [ $compiler -eq 11 ] ; then
       # Intel compiler for Windows
@@ -220,8 +223,8 @@ compileAndRun() {
         isetoption="/QxCORE-AVX512"
       fi      
       parameters="/D testcase=$testcase /D vtype=$vtype /D rtype=$rtype /D INSTRSET=$instrset /D funcname=$funcname"
-      echo "icl $parameters $options -I$include $testbench $isetoption $parix $extraoptions"
-      eval icl.exe $parameters $options -I$include $testbench $isetoption $parix $extraoptions
+      echo "icl $parameters $options -I$include $isetoption $parix $extraoptions $testbench $extrasource"
+      eval icl.exe $parameters $options -I$include $isetoption $parix $extraoptions $testbench $extrasource
       
   else
       echo "Error: Unknown compiler" >> $outfile
@@ -265,12 +268,12 @@ setCompiler() {
   if [ $compiler -eq 1 ] ; then
     # Gnu compiler
     options="-m$mode -std=c++17 -O3 -fno-trapping-math -o$exefilename"
-	# -ffinite-math-only will spoil checks for nan and infinite
+    # -ffinite-math-only will spoil checks for nan and infinite
   elif [ $compiler -eq 2 ] ; then
     # Clang compiler
     options="-m$mode -std=c++17 -O3 -fno-trapping-math -o$exefilename"
   elif [ $compiler -eq 3 ] ; then
-    # Intel compiler for Linux, legacy
+    # Intel compiler for Linux, legacy ("classic")
     options="-m$mode -std=c++17 -O3 -fno-trapping-math -fp-model precise -o$exefilename"    
   elif [ $compiler -eq 4 ] ; then
     # Intel compiler for Linux, clang based
