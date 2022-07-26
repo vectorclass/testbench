@@ -1,7 +1,7 @@
 /****************************  testbench3.cpp   *******************************
 * Author:        Agner Fog
 * Date created:  2019-04-11
-* Last modified: 2022-07-16
+* Last modified: 2022-07-26
 * Version:       2.02
 * Project:       Testbench for vector class library, 3: mathematical functions
 * Description:
@@ -106,7 +106,7 @@ Test cases:
 #include <cmath>
 
 #if (defined(__GNUC__) || defined(__clang__)) && !defined (__CYGWIN__)
-//#include <fpu_control.h>          // setting FP control word needed only in WSL
+//#include <fpu_control.h>        // setting FP control word needed only in WSL version 1
 #endif
 
 // Uncomment the next line if you want to test signed zeroes:
@@ -116,14 +116,19 @@ Test cases:
 #define INSTRSET 10
 #endif
 
+
 #include "vectorclass.h"          // vector class library
-#if true                          // true if you want inline mathematical functions
-                                  // false if you are using SVML library
+
+// #define USEMATHLIB             // for using external library SVML
+
+// #define __INTEL_COMPILER       // this will make ICPX compiler use SVML intrinsics
+
+#ifdef USEMATHLIB
+#include "vectormath_lib.h"       // alternative for SVML library
+#else
 #include "vectormath_exp.h"       // power, exponential, and logarithm functions
 #include "vectormath_trig.h"      // trigonometric functions
 #include "vectormath_hyp.h"       // hyperbolic functions
-#else
-#include "vectormath_lib.h"       // alternative for SVML library
 #endif
 
 
@@ -134,14 +139,15 @@ Test cases:
 
 //#define SIGNED_ZERO 
 
-#define testcase 1
+#define testcase 100              // select test case
 
-#define vtype Vec4f
+#define vtype Vec16f              // select vector type
 
-#define rtype vtype
+
+#define rtype vtype               // vector type for function return
 //#define rtype Vec8i
 
-#define seed 1
+#define seed 1                    // seed for random number generator
 
 
 #else
@@ -160,7 +166,7 @@ Test cases:
 #endif
 
 #ifndef INSTRSET
-#define INSTRSET 5
+#define INSTRSET 10
 #endif
 
 // random number seed
@@ -539,8 +545,12 @@ long double referenceFunction(ST a) {
 #if INSTRSET < 8  // lower overflow limit without FMA
 #define MAXF      1.E4       // max value for float parameter
 #define MAXD      1.E8       // max value for double parameter
+#else
+#define MAXF      1.E7       // max value for float parameter
+#define MAXD      1.E15       // max value for double parameter
 #endif
 #define USE_ABSOLUTE_ERROR
+#define IGNORE_NAN
 
 #elif   testcase == 201      // cos
 inline rtype testFunction(vtype const& a) { 
@@ -550,12 +560,16 @@ long double referenceFunction(ST a) {
     if (abs(a) > trig_input_limit) return 1.;
     return cosl(a); 
 }
-#define FACCURACY 3          // desired accuracy
+#define FACCURACY 4          // desired accuracy
 #if INSTRSET < 8  // lower overflow limit without FMA
 #define MAXF      1.E4       // max value for float parameter
 #define MAXD      1.E8       // max value for double parameter
+#else
+#define MAXF      1.E7       // max value for float parameter
+#define MAXD      1.E15       // max value for double parameter
 #endif
 #define USE_ABSOLUTE_ERROR
+#define IGNORE_NAN
 
 #elif   testcase == 202      // sincos
 inline rtype testFunction(vtype const& a) {
@@ -566,12 +580,16 @@ long double referenceFunction(ST a) {
     if (abs(a) > trig_input_limit) return 0.;
     return sinl(a); 
 }
-#define FACCURACY 3          // desired accuracy
+#define FACCURACY 4          // desired accuracy
 #if INSTRSET < 8  // lower overflow limit without FMA
 #define MAXF      1.E4       // max value for float parameter
 #define MAXD      1.E8       // max value for double parameter
+#else
+#define MAXF      1.E7       // max value for float parameter
+#define MAXD      1.E15       // max value for double parameter
 #endif
 #define USE_ABSOLUTE_ERROR
+#define IGNORE_NAN
 
 #elif   testcase == 203      // sincos
 inline rtype testFunction(vtype const& a) {
@@ -583,12 +601,16 @@ long double referenceFunction(ST a) {
     if (abs(a) > trig_input_limit) return 1.;
     return cosl(a); 
 }
-#define FACCURACY 3          // desired accuracy
+#define FACCURACY 4          // desired accuracy
 #if INSTRSET < 8  // lower overflow limit without FMA
 #define MAXF      1.E4       // max value for float parameter
 #define MAXD      1.E8       // max value for double parameter
+#else
+#define MAXF      1.E7       // max value for float parameter
+#define MAXD      1.E15      // max value for double parameter
 #endif
 #define USE_ABSOLUTE_ERROR
+#define IGNORE_NAN
 
 #elif   testcase == 204      // tan
 inline rtype testFunction(vtype const& a) { 
@@ -598,12 +620,16 @@ long double referenceFunction(ST a) {
     if (abs(a) > trig_input_limit) return 0.;
     return std::tan((long double)a); 
 }
-#define FACCURACY 4    // desired accuracy. usually below 3. 
+#define FACCURACY 4          // desired accuracy
 #if INSTRSET < 8  // lower overflow limit without FMA
 #define MAXF      1.E4       // max value for float parameter
 #define MAXD      1.E8       // max value for double parameter
+#else
+#define MAXF      1.E7       // max value for float parameter
+#define MAXD      1.E15      // max value for double parameter
 #endif
 #define USE_ABSOLUTE_ERROR
+#define IGNORE_NAN
 
 #elif   testcase == 205      // asin
 inline rtype testFunction(vtype const& a) { return asin(a); }
@@ -636,11 +662,16 @@ long double referenceFunction(ST a) {
     long double a2 = a - 2. * ai;
     return sinl(a2*pi_long); 
 }
-//#define FACCURACY 2          // desired accuracy float on compilers that support long double
-#define FACCURACY 180          // accuracy (reference function not accurate if long double not supported)
+#if INSTRSET < 8  // lower overflow limit without FMA
+#define MAXF      1.E10      // max value for float parameter
+#define MAXD      1.E15      // max value for double parameter
+#else
+#define MAXF      1.E30      // max value for float parameter
+#define MAXD      1.E100     // max value for double parameter
+#endif
 #define USE_ABSOLUTE_ERROR
-#define MAXF      1.E30       // max value for float parameter
-#define MAXD      1.E200      // max value for double parameter
+#define IGNORE_NAN
+#define FACCURACY 180        // accuracy (reference function not accurate if long double not supported)
 
 
 #elif   testcase == 211      // cospi
@@ -653,11 +684,16 @@ long double referenceFunction(ST a) {
     long double ai = roundl(0.5 * a);
     long double a2 = a - 2. * ai;
     return cosl(a2*pi_long); }
-//#define FACCURACY 2          // desired accuracy float on compilers that support long double
-#define FACCURACY 180          // accuracy (reference function not accurate if long double not supported)
-#define USE_ABSOLUTE_ERROR
+#if INSTRSET < 8  // lower overflow limit without FMA
+#define MAXF      1.E10       // max value for float parameter
+#define MAXD      1.E15       // max value for double parameter
+#else
 #define MAXF      1.E30       // max value for float parameter
-#define MAXD      1.E20      // max value for double parameter
+#define MAXD      1.E100      // max value for double parameter
+#endif
+#define USE_ABSOLUTE_ERROR
+#define IGNORE_NAN
+#define FACCURACY 180          // accuracy (reference function not accurate if long double not supported)
 
 #elif   testcase == 212      // sincospi
 inline rtype testFunction(vtype const& a) { 
@@ -670,11 +706,16 @@ long double referenceFunction(ST a) {
     long double a2 = a - 2. * ai;
     return sinl(a2 * pi_long);
 }
-//#define FACCURACY 2          // desired accuracy float on compilers that support long double
-#define FACCURACY 180          // accuracy (reference function not accurate if long double not supported)
-#define USE_ABSOLUTE_ERROR
+#if INSTRSET < 8  // lower overflow limit without FMA
+#define MAXF      1.E10       // max value for float parameter
+#define MAXD      1.E10       // max value for double parameter
+#else
 #define MAXF      1.E30       // max value for float parameter
-#define MAXD      1.E200      // max value for double parameter
+#define MAXD      1.E100      // max value for double parameter
+#endif
+#define USE_ABSOLUTE_ERROR
+#define IGNORE_NAN
+#define FACCURACY 180        // accuracy (reference function not accurate if long double not supported)
 
 #elif   testcase == 213      // sincospi
 inline rtype testFunction(vtype const& a) { 
@@ -688,11 +729,16 @@ long double referenceFunction(ST a) {
     long double ai = roundl(0.5 * a);
     long double a2 = a - 2. * ai;
     return cosl(a2*pi_long); }
-//#define FACCURACY 2          // desired accuracy float on compilers that support long double
-#define FACCURACY 180          // accuracy (reference function not accurate if long double not supported)
-#define USE_ABSOLUTE_ERROR
+#if INSTRSET < 8  // lower overflow limit without FMA
+#define MAXF      1.E10       // max value for float parameter
+#define MAXD      1.E10       // max value for double parameter
+#else
 #define MAXF      1.E30       // max value for float parameter
-#define MAXD      1.E20      // max value for double parameter
+#define MAXD      1.E100      // max value for double parameter
+#endif
+#define USE_ABSOLUTE_ERROR
+#define IGNORE_NAN
+#define FACCURACY 180        // accuracy (reference function not accurate if long double not supported)
 
 #elif   testcase == 214      // tanpi
 inline rtype testFunction(vtype const& a) { 
@@ -715,11 +761,16 @@ long double referenceFunction(ST a) {
     long double r = tanl(a2*pi_long);
     return r;
 }
-//#define FACCURACY 8          //  accuracy on compilers that support long double
-#define FACCURACY 1500          // accuracy (reference function not accurate if long double not supported)
+#if INSTRSET < 8  // lower overflow limit without FMA
+#define MAXF      1.E4        // max value for float parameter
+#define MAXD      1.E10       // max value for double parameter
+#else
+#define MAXF      1.E20       // max value for float parameter
+#define MAXD      1.E50       // max value for double parameter
+#endif
 #define USE_ABSOLUTE_ERROR
-#define MAXF      1.E30       // max value for float parameter
-#define MAXD      1.E8      // max value for double parameter
+#define IGNORE_NAN
+#define FACCURACY 2000        // accuracy (reference function not accurate if long double not supported)
 
 // ----------------------------------------------------------------------------
 //             Hyperbolic functions: vectormath_hyp.h
@@ -762,8 +813,8 @@ long double referenceFunction(ST a) { return acoshl(a); }
 inline rtype testFunction(vtype const& a) { return atanh(a); }
 long double referenceFunction(ST a) { return atanhl(a); }
 #define FACCURACY 2          // desired accuracy
-#define MAXF      1          // max value for float parameter
-#define MAXD      1          // max value for double parameter
+#define MAXF      1.25       // max value for float parameter
+#define MAXD      1.25       // max value for double parameter
 
 
 // ----------------------------------------------------------------------------
@@ -819,7 +870,9 @@ long double referenceFunction(ST a, ST b) {
 
 #elif   testcase == 510      // atan2
 
-inline rtype testFunction(vtype const& a, vtype const& b) { return atan2(a, b); }
+inline rtype testFunction(vtype const& a, vtype const& b) { 
+    return atan2(a, b); 
+}
 long double referenceFunction(ST a, ST b) { return atan2l(a, b); }
 #define FACCURACY 3          // desired accuracy
 #define TWO_PARAMETERS       // has two parameters
@@ -1131,9 +1184,11 @@ public:
             list[i++] = bit_castf(0x7F800000);   // inf
             list[i++] = bit_castf(0xFF800000);   // -inf
             list[i++] = bit_castf(0x7FF00000);   // nan
-            list[i++] = (T)1.E10;
-            list[i++] = -(T)1.E15;
-            list[i++] = (T)1.E20;
+            if (MAXF > 1.E20) {
+                list[i++] = (T)1.E10;
+                list[i++] = -(T)1.E15;
+                list[i++] = (T)1.E20;
+            }
         }
         else { // double
             list[i++] = (T)bit_castd(0x8000000000000000);   // -0
@@ -1336,7 +1391,7 @@ inline double compare_vectors(T const& a, T const& b) {
 template <typename T, typename R>
 bool errorreport(int i, int k, T const a, R const r, long double const e) {
     bool ignore = false;  // error should not be reported as serious
-    bool signerror;    // signed zero has wrong sign
+    bool signerror;       // signed zero has wrong sign
     if (numerr == 0) {
         printf("\ntest case %i:", testcase);
     }
@@ -1416,7 +1471,7 @@ bool errorreport(int i, int j, int k, T const a, T const b, R const r, long doub
 int main(int argc, char* argv[]) {
     vtype a, b;                        // operand vectors
     rtype result;                      // result vector
-    rtype expected;                    // expected result
+    //rtype expected;                    // expected result
     const int vectorsize = sizeof(vtype) / sizeof(decltype(a[0]));
     bool ignore;                       // ignore certain error conditions
     int sign_error = 0;                // results have different sign bit
