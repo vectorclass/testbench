@@ -1,8 +1,8 @@
 /****************************  testbench2.cpp   *******************************
 * Author:        Agner Fog
 * Date created:  2019-04-15
-* Last modified: 2022-07-16
-* Version:       2.02.00
+* Last modified: 2023-07-04
+* Version:       2.02.02
 * Project:       Testbench for vector class library, 2: permute functions etc.
 * Description:
 * Compile and run this program to test permute functions etc. in VCL
@@ -46,7 +46,7 @@
 * Specify the desired instruction set and optimization options as parameters
 * to the compiler.
 *
-* (c) Copyright Agner Fog 2019-2022
+* (c) Copyright Agner Fog 2019-2023
 * Gnu general public license 3.0 https://www.gnu.org/licenses/gpl.html
 ******************************************************************************
 Test cases:
@@ -311,7 +311,6 @@ rtype compareFunction(rtype const& r, vtypei const& ix, rtype const& a, rtype co
 
 inline vtype testFunction(vtypei const& i, vtype const& a, vtype const& b, vtype const& c, vtype const& d) {
     vtype r = funcname(i, a, b, c, d);           // call lookup function
-     //  r.insert(1, 99); 
     return r;
 }
 
@@ -587,7 +586,7 @@ class ranGen {
     uint64_t x, carry;
 public:
     ranGen(int Seed) {            // constructor
-        x = Seed;  carry = 1765;  //initialize with seed
+        x = uint64_t(Seed);  carry = 1765;  //initialize with seed
         next();  next();
     }
     uint32_t next() {             // get next random number, using multiply-with-carry method
@@ -678,13 +677,13 @@ public:
 vtypei makeIndexes(int n) {
     int i;                                       // loop counter
     // fill index table
-    for (int i = 0; i < tablesize; i++) {
+    for (i = 0; i < tablesize; i++) {
         uint32_t ix = get_random<uint32_t>(ran); // random index
         indextable[i] = STI(ix % uint32_t(n));    // modulo n
         datatable[i] = get_random<RT>(ran);
     }
     // make index vector
-    vtypei vi;
+    vtypei vi(0);
     for (i = 0; i < vi.size(); i++) {
         vi.insert(i, STI(indextable[i]));
     }
@@ -702,7 +701,7 @@ void errorreport(vtype const& a, vtype const& b, rtype const& r, rtype const& e)
     printf("\nindex, input, output, expected:");
     for (int j = 0; j < vectorsize; j++) {
         int i = indexlist[j];
-        if (testcase >= 3) i = (int)indextable[j];
+        if constexpr (testcase >= 3) i = (int)indextable[j];
         if (error - 1 == j || (r[j] != e[j] && i != V_DC)) {
             printf("\n-> ");
         }
@@ -712,7 +711,7 @@ void errorreport(vtype const& a, vtype const& b, rtype const& r, rtype const& e)
         if (i == V_DC) printf("V_DC, ");
         else printf("%4i, ", i);
         printReduced(a[j]);  printf(",  ");
-        if (testcase == 2) {
+        if constexpr (testcase == 2) {
             printReduced(b[j]);  printf(",  ");
         }
         printReduced(r[j]);  printf(",  ");
@@ -727,7 +726,7 @@ int main(int argc, char* argv[]) {
     rtype ss;                     // data to scatter
     rtype result;                 // result vector
     rtype expected;               // expected result
-    const int vectorsize = sizeof(vtype) / sizeof(decltype(a[0]));
+    //const int vectorsize = sizeof(vtype) / sizeof(decltype(a[0]));
     int ntest = 1;                // number of test runs
 
     // lists of test data
