@@ -1,8 +1,8 @@
 /****************************  testbench3.cpp   *******************************
 * Author:        Agner Fog
 * Date created:  2019-04-11
-* Last modified: 2022-07-26
-* Version:       2.02
+* Last modified: 2023-07-04
+* Version:       2.02.02
 * Project:       Testbench for vector class library, 3: mathematical functions
 * Description:
 * Compile and run this program to test mathematical functions in VCL
@@ -1087,7 +1087,7 @@ class ranGen {
     uint64_t x, carry;
 public:
     ranGen(int Seed) {            // constructor
-        x = Seed;  carry = 1765;  //initialize with seed
+        x = uint64_t(Seed);  carry = 1765;  //initialize with seed
         next();  next();
     }
     uint32_t next() {             // get next random number, using multiply-with-carry method
@@ -1323,7 +1323,7 @@ inline double compare_scalars(float const a, long double const b) {
         aa = .01f; // relative error becomes too big for periodic functions when result is near zero
     }
 #endif
-    double dif = std::fabs((long double)a - b) / delta_unit(aa);
+    double dif = double(std::fabs((long double)a - b) / delta_unit(aa));
     return dif;
 }
 
@@ -1356,7 +1356,7 @@ inline double compare_scalars(int32_t const a, long double const b) {
     if ((double)a == (double)b) { // a and b equal
         return 0;
     }
-    double dif = std::fabs((double)a - b);
+    double dif = double(std::fabs((double)a - b));
     return dif;
 }
 
@@ -1364,7 +1364,7 @@ inline double compare_scalars(int64_t const a, long double const b) {
     if ((double)a == (double)b) { // a and b equal
         return 0;
     }
-    double dif = std::fabs((double)a - b);
+    double dif = double(std::fabs((double)a - b));
     return dif;
 }
 
