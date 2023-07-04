@@ -1,8 +1,8 @@
 /****************************  testbench1.cpp   *******************************
 * Author:        Agner Fog
 * Date created:  2019-04-09
-* Last modified: 2022-07-20
-* Version:       2.02.00
+* Last modified: 2023-07-04
+* Version:       2.02.02
 * Project:       Testbench for vector class library
 * Description:
 * Compile and run this program to test operators and functions in VCL
@@ -168,7 +168,7 @@ Test cases:
 
 #define testcase 1
 
-#define vtype Vec4f
+#define vtype Vec8f
 
 #define rtype vtype
 //#define rtype Vec32uc
@@ -1613,7 +1613,7 @@ class ranGen {
     uint64_t x, carry;
 public:
     ranGen(int Seed) {  // constructor
-        x = Seed;  carry = 1765;  //initialize with seed
+        x = uint64_t(Seed);  carry = 1765;  //initialize with seed
         next();  next();
     }
     uint32_t next() {  // get next random number, using multiply-with-carry method
@@ -1714,7 +1714,7 @@ public:
             // floating point type
             // fill boundary data into array
             for (i = 0; i < 20; i++) {
-                list[i] = T((i - 4) * T(0.25));
+                list[i] = T(T(i - 4) * T(0.25));
             }
 #ifdef TESTNAN   // test also with NAN, INF, and other special data
             // additional special values, float:
@@ -1895,7 +1895,7 @@ int main() {
             loadData(b, bdata.list + j);
 
 #if defined(USE_FLAG)
-            vtype f;
+            vtype f(0);
             for (int k = 0; k < vectorsize; k++) {
                 f.insert(k, ST(k%3 != 0));
             }
