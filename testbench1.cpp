@@ -1,7 +1,7 @@
 /****************************  testbench1.cpp   *******************************
 * Author:        Agner Fog
 * Date created:  2019-04-09
-* Last modified: 2023-07-04
+* Last modified: 2023-12-02
 * Version:       2.02.02
 * Project:       Testbench for vector class library
 * Description:
@@ -158,7 +158,14 @@ Test cases:
 #define INSTRSET 10          // desired instruction set
 #endif
 
+//#define VCL_NAMESPACE MYNAMESPACE
+
+
 #include <vectorclass.h>     // vector class library
+
+#ifdef VCL_NAMESPACE
+using namespace VCL_NAMESPACE;
+#endif
 
 
 #ifndef testcase 
@@ -168,7 +175,7 @@ Test cases:
 
 #define testcase 1
 
-#define vtype Vec8f
+#define vtype Vec16i
 
 #define rtype vtype
 //#define rtype Vec32uc
@@ -256,7 +263,7 @@ rtype referenceFunction(vtype a, vtype b) {
 #if defined(indexes) && (indexes + 0 != 0) // if indexes is not blank, use it as divisor
 const ST divisor = indexes ;
 #else
-const ST divisor = 2;
+const ST divisor = 13;
 #endif
 inline rtype testFunction(vtype const& a, vtype const& b) { 
     //return a / (divisor); 
@@ -346,7 +353,7 @@ inline rtype testFunction(vtype const& a, vtype const& b) {
     union {             // make aligned array
         ST y[vtype::size()];
         vtype dummy;
-    } aligned = {0};
+    } aligned = {{0}};
     a.store_a(aligned.y);
     return vtype().load_a(aligned.y);
 }
@@ -357,7 +364,7 @@ inline rtype testFunction(vtype const& a, vtype const& b) {
     union {             // make aligned array
         ST y[vtype::size()];
         vtype dummy;
-    } aligned = {0};
+    } aligned = {{0}};
     a.store_nt(aligned.y);
     return vtype().load_a(aligned.y);
 }
@@ -1895,7 +1902,8 @@ int main() {
             loadData(b, bdata.list + j);
 
 #if defined(USE_FLAG)
-            vtype f(0);
+            //vtype f(0);
+            vtype f(ST(0));
             for (int k = 0; k < vectorsize; k++) {
                 f.insert(k, ST(k%3 != 0));
             }
