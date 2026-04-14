@@ -1,8 +1,8 @@
 /****************************  testbench4.cpp   *******************************
 * Author:        Agner Fog
 * Date created:  2019-04-09
-* Last modified: 2022-07-20
-* Version:       2.02.00
+* Last modified: 2026-04-10
+* Version:       2.02.03
 * Project:       Testbench for vector class library
 * Description:
 * Compile and run this program to test operators and functions in VCL
@@ -37,7 +37,7 @@
 * Specify the desired instruction set and optimization options as parameters
 * to the compiler.
 *
-* (c) Copyright 2019 - 2022 Agner Fog.
+* (c) Copyright 2019 - 2026 Agner Fog.
 * Gnu general public license 3.0 https://www.gnu.org/licenses/gpl.html
 ******************************************************************************
 Test cases:
@@ -161,9 +161,8 @@ Test cases:
 // maximum vector size
 #define MAX_VECTOR_SIZE 512
 
-
 #ifndef INSTRSET
-#define INSTRSET 10          // desired instruction set
+#define INSTRSET 12          // desired instruction set
 #endif
 
 #if INSTRSET >= 9 && !defined(__F16C__)
@@ -309,7 +308,7 @@ float to_float(uint32_t half, bool supportSubnormal = true) {
             uint32_t mant: 23;
             uint32_t expo:  8;
             uint32_t sign:  1;
-        };
+        } s;
     } u;
 
     u.hhh  = (half & 0x7fff) << 13;              // Exponent and mantissa
@@ -324,9 +323,9 @@ float to_float(uint32_t half, bool supportSubnormal = true) {
         }
     }
     if ((half & 0x7C00) == 0x7C00) {             // infinity or nan
-        u.expo = 0xFF;
+        u.s.expo = 0xFF;
         if (half & 0x3FF) {  // nan
-            u.mant = 1 << 22 | (half & 0x1FF);   // NAN payload is right-justified only in ForwardCom
+            u.s.mant = 1 << 22 | (half & 0x1FF); // NAN payload is right-justified only in ForwardCom
         }
     }
     u.hhh |= (half & 0x8000) << 16;              // sign bit
@@ -345,7 +344,7 @@ uint16_t to_float16(float x, bool supportSubnormal = true) {
             uint32_t mant: 23;
             uint32_t expo:  8;
             uint32_t sign:  1;
-        };
+        } s;
     } u;
     union {                                      // half precision float
         uint16_t h;
@@ -353,37 +352,37 @@ uint16_t to_float16(float x, bool supportSubnormal = true) {
             uint16_t mant: 10;
             uint16_t expo:  5;
             uint16_t sign:  1;
-        };
+        } s;
     } v;
     u.f = x;
-    v.expo = u.expo - 0x70;                      // adjust exponent bias
-    v.mant = u.mant >> 13;                       // get upper part of mantissa
-    if (u.mant & (1 << 12)) {                    // round to nearest or even
-        if ((u.mant & ((1 << 12) - 1)) || (v.mant & 1)) { // round up if odd or remaining bits are nonzero
+    v.s.expo = u.s.expo - 0x70;                  // adjust exponent bias
+    v.s.mant = u.s.mant >> 13;                   // get upper part of mantissa
+    if (u.s.mant & (1 << 12)) {                  // round to nearest or even
+        if ((u.s.mant & ((1 << 12) - 1)) || (v.s.mant & 1)) { // round up if odd or remaining bits are nonzero
             v.h++;                               // overflow will carry into exponent and sign
         }
     }
-    v.sign = u.sign;
-    if (u.expo == 0xFF) {                        // infinity or nan
-        v.expo = 0x1F;
-        if (u.mant != 0) {                       // Nan
-            v.mant = (u.mant & 0x1FF) | 0x200;   // NAN payload is right-justified only in ForwardCom        
+    v.s.sign = u.s.sign;
+    if (u.s.expo == 0xFF) {                      // infinity or nan
+        v.s.expo = 0x1F;
+        if (u.s.mant != 0) {                     // NaN
+            v.s.mant = (u.s.mant & 0x1FF) | 0x200;// NaN payload is right-justified only in ForwardCom        
         }
     }
-    else if (u.expo > 0x8E) {
-        v.expo = 0x1F;  v.mant = 0;              // overflow -> inf
+    else if (u.s.expo > 0x8E) {
+        v.s.expo = 0x1F;  v.s.mant = 0;          // overflow -> inf
     }
-    else if (u.expo < 0x71) {
-        v.expo = 0;
+    else if (u.s.expo < 0x71) {
+        v.s.expo = 0;
         if (supportSubnormal) {
-            u.expo += 24;
-            u.sign = 0;            
+            u.s.expo += 24;
+            u.s.sign = 0;            
             uint16_t mants = _mm_cvt_ss2si(_mm_load_ss(&u.f));
-            v.mant = mants & 0x3FF; // proper rounding of subnormal
-            if (mants == 0x400) v.expo = 1; // round up to normal
+            v.s.mant = mants & 0x3FF;            // proper rounding of subnormal
+            if (mants == 0x400) v.s.expo = 1;    // round up to normal
         }
         else {        
-            v.mant = 0;                          // underflow -> 0
+            v.s.mant = 0;                        // underflow -> 0
         }
     }
     return v.h;   
@@ -2062,7 +2061,7 @@ int main () {
     vtype a, b;                   // operand vectors
     rtype result;                 // result vector
     rtype expected;               // expected result
-    const int vectorsize = vtype::size();
+    constexpr int vectorsize = vtype::size();
 
 
 #if defined (__linux__) && !defined(__LP64__)
@@ -2145,7 +2144,7 @@ int main () {
 
 #else
             bool same = compare_vectors(result, expected);
-            int numresult = result.size();     // number of elements in result vector
+            constexpr int numresult = result.size();     // number of elements in result vector
 
             /*
             if (!same) {
