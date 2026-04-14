@@ -2,12 +2,12 @@
 # runtest.sh
 # Author:        Agner Fog
 # Date created:  2019-06-02
-# Last modified: 2022-07-26
+# Last modified: 2026-04-10
 # 
 # This script will compile and run a testbench for the C++ Vector Class Library
 # Using a list of test cases.
 #
-# (c) Copyright 2019-2022 by Agner Fog. 
+# (c) Copyright 2019-2026 by Agner Fog. 
 # GNU General Public License 3.0 or later www.gnu.org/licenses
 #
 ###############################################################################
@@ -181,8 +181,9 @@ compileAndRun() {
       
   elif [ $compiler -eq 4 ] ; then
       # Intel compiler for Linux, clang based
-      echo "icpx $parameters $options $isetoption -I$include $testbench $parix $extraoptions $testbench $extrasource"
-      eval icpx $parameters $options $isetoption -I$include $testbench $parix $extraoptions $testbench $extrasource
+      extraoptions="-Wno-unused-but-set-variable"
+      echo "icpx $parameters $options $isetoption -I$include $parix $extraoptions $testbench $extrasource"
+      eval icpx $parameters $options $isetoption -I$include $parix $extraoptions $testbench $extrasource
     
   elif [ $compiler -eq 10 ] ; then
       # MS compiler
