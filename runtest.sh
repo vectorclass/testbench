@@ -2,7 +2,7 @@
 # runtest.sh
 # Author:        Agner Fog
 # Date created:  2019-06-02
-# Last modified: 2026-04-10
+# Last modified: 2026-09-04
 # 
 # This script will compile and run a testbench for the C++ Vector Class Library
 # Using a list of test cases.
@@ -37,9 +37,12 @@
 #
 # Special lines:
 # A line beginning with a dollar sign ($) specifies a parameter:
-# $compiler= (1=Gnu, 2=Clang, 
-#             3=Intel compiler for Linux "classic", 4=Intel compiler for Linux, clang based
-#            10=Microsoft compiler for Windows, 11=Intel compiler for Windows "classic")
+# $compiler= (1=Gnu, 
+#             2=Clang, 
+#             3=Intel compiler for Linux "classic" (obsolete), 
+#             4=Intel compiler for Linux, clang based
+#            10=Microsoft compiler for Windows, 
+#            11=Intel compiler for Windows "classic" (obsolete))
 # $mode= (32 for 32-bit mode, 64 for 64-bit mode)
 # $testbench= (name and path of .cpp testbench file)
 # $outfile= (name of output file)
@@ -352,7 +355,7 @@ getInstructionSet() {
     exit 2    # exit
   fi
 
-  echo -e "max instruction set: $maxiset\n"
+  echo -e "CPU max instruction set: $maxiset\n"
 }
 
 
