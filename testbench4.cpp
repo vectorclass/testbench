@@ -1,8 +1,8 @@
 /****************************  testbench4.cpp   *******************************
 * Author:        Agner Fog
 * Date created:  2019-04-09
-* Last modified: 2026-04-10
-* Version:       2.02.03
+* Last modified: 2026-09-04
+* Version:       2.02.04
 * Project:       Testbench for vector class library
 * Description:
 * Compile and run this program to test operators and functions in VCL
@@ -10,6 +10,8 @@
 * on half-precision floating point vectors.
 * Each function or operator is tested with many different combinations 
 * of input data.
+* Permute, blend, and lookup functions with half precision vectors are 
+* not tested by testbench4.cpp, but testbench2.cpp
 *
 * Instructions:
 * The following parameters must be defined on the command line or added 
@@ -40,6 +42,7 @@
 * (c) Copyright 2019 - 2026 Agner Fog.
 * Gnu general public license 3.0 https://www.gnu.org/licenses/gpl.html
 ******************************************************************************
+
 Test cases:
 1:   operator +
 2:   operator -
@@ -1015,7 +1018,7 @@ RT referenceFunction(ST a, ST b) {
 #define FACCURACY 1      // accept  rounding errors
 
 #elif testcase == 530    // mul_add
-inline rtype testFunction(vtype const& a, vtype const& b) { return mul_add(a, b, vtype(1.f)); }
+inline rtype testFunction(vtype const& a, vtype const& b) { return mul_add(a, b, vtype(Float16(1.f))); }
 RT referenceFunction(ST a, ST b) {
     float c = float(a) * float(b) + 1.0f;
     return RT(c);
@@ -1023,7 +1026,7 @@ RT referenceFunction(ST a, ST b) {
 #define FACCURACY 2      // accept  rounding errors
 
 #elif testcase == 531    // mul_sub
-inline rtype testFunction(vtype const& a, vtype const& b) { return mul_sub(a, vtype(1.25f), b); }
+inline rtype testFunction(vtype const& a, vtype const& b) { return mul_sub(a, vtype(Float16(1.25f)), b); }
 RT referenceFunction(ST a, ST b) {
     float c = float(a) * 1.25f - float(b);
     return RT(c);
@@ -1031,7 +1034,7 @@ RT referenceFunction(ST a, ST b) {
 #define FACCURACY 2      // accept  rounding errors
 
 #elif testcase == 532    // nmul_add
-inline rtype testFunction(vtype const& a, vtype const& b) { return nmul_add(vtype(2.25f), a, b); }
+inline rtype testFunction(vtype const& a, vtype const& b) { return nmul_add(vtype(Float16(2.25f)), a, b); }
 RT referenceFunction(ST a, ST b) {
     float c = -2.25f * float(a) + float(b);
     return RT(c);
@@ -1094,8 +1097,9 @@ RT referenceFunction(ST a, ST b) {
     if (float(b) >= maxexp) return half2fp16(0x7C00); // INF
     float bf = float(b);
     float y = expf(bf);
-    return y;
+    return Float16(y);
 }
+
 #ifdef __AVX512FP16__    // intermediate calculations with half precision
 #define FACCURACY 7      // accept accumulating rounding errors
 #else                    // intermediate calculations with float precision
@@ -1114,7 +1118,7 @@ RT referenceFunction(ST a, ST b) {
 #endif
     if (float(b) >= maxexp) return half2fp16(0x7C00); // INF
 
-    return exp2f(float(b));
+    return Float16(exp2f(float(b)));
 }
 #ifdef __AVX512FP16__    // intermediate calculations with half precision
 #define FACCURACY 6      // accept accumulating rounding errors
@@ -1132,8 +1136,9 @@ RT referenceFunction(ST a, ST b) {
     float maxexp = 1000.f;
 #endif
     if (float(b) >= maxexp) return half2fp16(0x7C00); // INF
-    return powf(10.f, float(b));
+    return Float16(powf(10.f, float(b)));
 }
+
 #ifdef __AVX512FP16__    // intermediate calculations with half precision
 #define FACCURACY 6      // accept accumulating rounding errors
 #else                    // intermediate calculations with float precision
@@ -1151,7 +1156,7 @@ RT referenceFunction(ST a, ST b) {
     float maxexp = 1000.f;
 #endif
     if (float(b) >= maxexp) return half2fp16(0x7C00); // INF
-    return expm1f(float(b));
+    return Float16(expm1f(float(b)));
 }
 #ifdef __AVX512FP16__    // intermediate calculations with half precision
 #define FACCURACY 7      // accept accumulating rounding errors
@@ -1166,8 +1171,8 @@ RT referenceFunction(ST a, ST b) {
     // limit
     float sinlimit = 314.25;
     //if ((fp162half(b) & 0x7FFF) == 0x7C00) return half2fp16(0x7E00); // INF -> NAN
-    if (abs(float(b)) > sinlimit) return 0;
-    return sinf(float(b));
+    if (abs(float(b)) > sinlimit) return Float16(0.f);
+    return Float16(sinf(float(b)));
 }
 #define FACCURACY 6      // accept accumulating rounding errors
 #define IGNORE_SUBNORMAL
@@ -1178,8 +1183,8 @@ RT referenceFunction(ST a, ST b) {
     // limit
     float sinlimit = 314.25;
     //if ((fp162half(b) & 0x7FFF) == 0x7C00) return half2fp16(0x7E00); // INF -> NAN
-    if (abs(float(b)) > sinlimit) return 1.;
-    return cosf(float(b));
+    if (abs(float(b)) > sinlimit) return Float16(1.f);
+    return Float16(cosf(float(b)));
 }
 #define FACCURACY 12      // accept accumulating rounding errors
 #define IGNORE_SUBNORMAL
@@ -1192,8 +1197,8 @@ RT referenceFunction(ST a, ST b) {
     // limit
     float sinlimit = 314.25;
     //if ((fp162half(b) & 0x7FFF) == 0x7C00) return half2fp16(0x7E00); // INF -> NAN
-    if (abs(float(b)) > sinlimit) return 0.;
-    return tanf(float(b));
+    if (abs(float(b)) > sinlimit) return Float16(0.f);
+    return Float16(tanf(float(b)));
 }
 #define FACCURACY 1000      // rounding errors are high for high x
 #define IGNORE_SUBNORMAL
@@ -1216,7 +1221,7 @@ RT referenceFunction(ST a, ST b) {
     if (abs(float(b)) > sinlimit) {
         s = 0; c = 1;
     }  
-    return b >= ST(0) ? s : c;
+    return Float16(b >= ST(0) ? s : c);
 }
 #define FACCURACY 12      // accept accumulating rounding errors
 #define IGNORE_SUBNORMAL
@@ -1227,11 +1232,11 @@ inline rtype testFunction(vtype const& a, vtype const& b) { return sinpi(b); }
 RT referenceFunction(ST a, ST b) {
     // limit
 #ifdef __AVX512FP16__
-    if (fabs(b) > 32000) return 0; // overflow -> 0
+    if (fabs(b) > 32000) return Float16(0.f); // overflow -> 0
 #else
     if ((fp162half(b) & 0x7FFF) == 0x7C00) return half2fp16(0x7E00); // INF -> NAN
 #endif
-    return (float)sinl(float(b)*3.14159265358979323846);
+    return Float16((float)sinl(float(b)*3.14159265358979323846));
 }
 #define FACCURACY 2       // accept accumulating rounding errors
 #define IGNORE_SUBNORMAL
@@ -1241,11 +1246,11 @@ inline rtype testFunction(vtype const& a, vtype const& b) { return cospi(b); }
 RT referenceFunction(ST a, ST b) {
     // limit
 #ifdef __AVX512FP16__
-    if (fabs(b) > 32000) return 1.; // overflow -> 1
+    if (fabs(b) > 32000) return Float16(1.f); // overflow -> 1
 #else
     if ((fp162half(b) & 0x7FFF) == 0x7C00) return half2fp16(0x7E00); // INF -> NAN
 #endif
-    return (float)cosl(float(b)*3.14159265358979323846);
+    return Float16((float)cosl(float(b)*3.14159265358979323846));
 }
 #define FACCURACY 2       // accept accumulating rounding errors
 #define IGNORE_SUBNORMAL
@@ -1255,7 +1260,7 @@ inline rtype testFunction(vtype const& a, vtype const& b) { return tanpi(b); }
 RT referenceFunction(ST a, ST b) {
     // limit
 #ifdef __AVX512FP16__
-    if (fabs(b) > 32000) return 0;; // overflow -> 0
+    if (fabs(b) > 32000) return Float16(0.f); // overflow -> 0
 #else
     if ((fp162half(b) & 0x7FFF) == 0x7C00) return half2fp16(0x7E00); // INF -> NAN
 #endif
@@ -1265,7 +1270,7 @@ RT referenceFunction(ST a, ST b) {
         if ((ia2 & 3) == 1) return half2fp16(0x7C00); //  INF
         if ((ia2 & 3) == 3) return half2fp16(0xFC00); // -INF
     } 
-    return (float)tanl(float(b)*3.14159265358979323846);
+    return Float16((float)tanl(float(b)*3.14159265358979323846));
 }
 #define FACCURACY 4       // accept accumulating rounding errors
 #define IGNORE_SUBNORMAL
@@ -1289,7 +1294,7 @@ RT referenceFunction(ST a, ST b) {
         c = s = half2fp16(0x7E00); // INF -> NAN
     }
 #endif
-    return b >= ST(0) ? s : c;
+    return Float16(b >= ST(0) ? s : c);
 }
 #define FACCURACY 2      // accept accumulating rounding errors
 #define IGNORE_SUBNORMAL
@@ -1554,13 +1559,13 @@ rtype referenceFunction(vtype const& a, vtype const& b) {
 // test with signed and unsigned types
 inline rtype testFunction(vtype const& a, vtype const& b) { return to_float16(b); }
 RT referenceFunction(ST a, ST b) {
-    return float(b);
+    return Float16(float(b));
 }
 
 #elif testcase == 621    // to_float16: uint16_t to float16
 inline rtype testFunction(vtype const& a, vtype const& b) { return to_float16(b); }
 RT referenceFunction(ST a, ST b) {
-    return float(b);
+    return Float16(float(b));
 }
 
 #elif testcase == 622   // to_float: Float16 -> float
