@@ -1,8 +1,8 @@
 /****************************  testbench2.cpp   *******************************
 * Author:        Agner Fog
 * Date created:  2019-04-15
-* Last modified: 2023-07-04
-* Version:       2.02.02
+* Last modified: 2026-09-09
+* Version:       2.02.04
 * Project:       Testbench for vector class library, 2: permute functions etc.
 * Description:
 * Compile and run this program to test permute functions etc. in VCL
@@ -46,7 +46,7 @@
 * Specify the desired instruction set and optimization options as parameters
 * to the compiler.
 *
-* (c) Copyright Agner Fog 2019-2023
+* (c) Copyright Agner Fog 2019-2026
 * Gnu general public license 3.0 https://www.gnu.org/licenses/gpl.html
 ******************************************************************************
 Test cases:
@@ -69,6 +69,7 @@ Test cases:
 
 //#define __AVX512VBMI__
 //#define __AVX512VBMI2__
+//#define __AVX512FP16__
 
 #ifndef INSTRSET
 #define INSTRSET    10      // desired instruction set
@@ -76,33 +77,41 @@ Test cases:
 
 
 #include <vectorclass.h>
+#include <vectorfp16.h>
+
 
 #ifndef testcase
 // ----------------------------------------------------------------------------
 //            Specify input parameters here if running from an IDE
 // ----------------------------------------------------------------------------
 
-#define testcase 2
+#define testcase 6
 
-#define vtype Vec16c
+// define vector type
+#define vtype Vec32s
 
+// define index vector type
+#define vtypei Vec32s
+
+// define return vector type
 #define rtype vtype
 
-#define funcname blend16
+#define funcname lookup
+//#define funcname permute8
 
 //#define indexes  20,40,30,10, 1,0,-1,52 ,4,14,24,31, 11,12,14,11, 22,11,3,V_DC, 8,6,4,8, 0,11,11,11, 31,30,29,28, \
 //                 20,20,30,10, 1,0,-1,2 ,60,14,24,31, 11,12,14,11, 22,11,33,V_DC, 8,6,4,8, 0,11,11,11, 31,30,29,28
 //#define indexes  2,12,13,10, 1,0,15,11
 
-//#define indexes  1,0,3,2,5,4,7,6,9,8,11,10,13,12,15,14
+//#define indexes  1,0,3,2,5,4,7,6,9,8,11,10,13,12,15,14   // 16
 
 //#define indexes  1,0,3,2,5,4,7,6,9,8,11,10,13,12,15,14,17,16,19,18,21,20,23,22,25,24,27,26,29,28,31,30
 
 //#define indexes  1,0,3,2,5,4,7,6,9,8,11,10,13,12,15,14
 
-//#define indexes  1,0,3,2,5,4,7,6
+#define indexes  1,0,3,2,5,4,7,6     // 8
 
-#define indexes  0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30
+//#define indexes  0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30
 
 
 #define seed 1
@@ -361,6 +370,11 @@ inline rtype testFunction3(vtypei const & ix, RT const * table) {
     return r;
 }
 
+inline rtype testFunction4(vtypei const & ix, RT const * table) {
+    rtype r = lookup<vectorsize * 3 + 1>(ix, table);      // call lookup function
+    return r;
+}
+
 rtype compareFunction(uint32_t imax, rtype const & r, vtypei const & ix) {
     // compare result r with expected value
     RT result[vectorsize];                          // array for result
@@ -571,6 +585,10 @@ void printReduced(float x) {
     printf("%6.3G", x);
 }
 
+void printReduced(Float16 x) {
+    printf("%6.3G", (float)x);
+}
+
 void printReduced(double x) {
     printf("%6.3G", x);
 }
@@ -631,7 +649,7 @@ float get_random<float>(ranGen & rangen) {
     return u2.f - u1.f;
 }
 
-template <>  // special case float
+template <>  // special case double
 double get_random<double>(ranGen & rangen) {
     union Uqd {
         uint64_t q;
@@ -644,6 +662,14 @@ double get_random<double>(ranGen & rangen) {
     u1.q = (r >> 12) | 0x3FF0000000000000;       // bit 12 - 63
     return u1.d - 1.0;
 }
+
+template <>  // special case Float16
+Float16 get_random<Float16>(ranGen & rangen) {
+    float r = get_random<float>(rangen);
+    return Float16(r);
+}
+
+
 template <>  // special case bool
 bool get_random<bool>(ranGen & rangen) {
     return (rangen.next() & 1) != 0;
@@ -683,7 +709,7 @@ vtypei makeIndexes(int n) {
         datatable[i] = get_random<RT>(ran);
     }
     // make index vector
-    vtypei vi(0);
+    vtypei vi(ST(0));
     for (i = 0; i < vi.size(); i++) {
         vi.insert(i, STI(indextable[i]));
     }
@@ -732,6 +758,7 @@ int main(int argc, char* argv[]) {
     // lists of test data
     TestData<ST> adata, bdata, cdata, ddata;
 
+
 #if testcase < 3   // permute and blend
     // call function to test
     adata.makeRandom();
@@ -752,9 +779,9 @@ int main(int argc, char* argv[]) {
 #elif testcase == 3                              // lookup function with one data vector
 
     //adata.makeRandom();
-    ntest = 20;                                  // number of test runs
+    ntest = 100;                                 // number of test runs
     for (int t = 0; t < ntest; t++) {            // loop for test runs
-        vtypei indx;                                 // index vector
+        vtypei indx;                             // index vector
         indx = makeIndexes(vectorsize);          // make random index vector
         ss.load(datatable);
         rtype r = testFunction(indx, ss);        // call function to test
@@ -769,7 +796,7 @@ int main(int argc, char* argv[]) {
 
     rtype ss2;
     vtypei indx;                                      // index vector
-    ntest = 20;                                       // number of test runs
+    ntest = 100;                                      // number of test runs
     for (int t = 0; t < ntest; t++) {                 // loop for test runs
         indx = makeIndexes(vectorsize * 2);           // make random index vector
         ss.load(datatable);
@@ -809,6 +836,8 @@ int main(int argc, char* argv[]) {
 #elif   testcase == 6    // lookup function with table
 
     vtypei indx;                                 // index vector
+    a = vtype(ST(0.f));                          // a unused
+
     ntest = 20;                                  // number of test runs
     // test with large table (tablesize)
     for (int t = 0; t < ntest; t++) {            // loop for test runs
@@ -816,7 +845,7 @@ int main(int argc, char* argv[]) {
         rtype r = testFunction1(indx, datatable);// call function to test
         rtype e = compareFunction(tablesize, r, indx); // compare with expected values
         if (error) {
-            errorreport(a, b, r, e);
+            errorreport(a, a, r, e);
             numerr++;
         }
     }
@@ -826,18 +855,27 @@ int main(int argc, char* argv[]) {
         rtype r = testFunction2(indx, datatable);// call function to test
         rtype e = compareFunction(vectorsize, r, indx); // compare with expected values
         if (error) {
-            errorreport(a, b, r, e);
+            errorreport(a, a, r, e);
             numerr++;
         }
     }
-
     // test with small table (vectorsize*2-1)
     for (int t = 0; t < ntest; t++) {            // loop for test runs
         indx = makeIndexes(vectorsize * 2 - 1);  // make random index vector
         rtype r = testFunction3(indx, datatable);// call function to test
-        rtype e = compareFunction(vectorsize * 2, r, indx); // compare with expected values
+        rtype e = compareFunction(vectorsize * 2 - 1, r, indx); // compare with expected values
         if (error) {
-            errorreport(a, b, r, e);
+            errorreport(a, a, r, e);
+            numerr++;
+        }
+    }
+    // test with small table (vectorsize*3 + 1)
+    for (int t = 0; t < ntest; t++) {            // loop for test runs
+        indx = makeIndexes(vectorsize * 3 + 1);  // make random index vector
+        rtype r = testFunction4(indx, datatable);// call function to test
+        rtype e = compareFunction(vectorsize * 3 + 1, r, indx); // compare with expected values
+        if (error) {
+            errorreport(a, a, r, e);
             numerr++;
         }
     }
