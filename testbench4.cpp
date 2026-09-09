@@ -1,7 +1,7 @@
 /****************************  testbench4.cpp   *******************************
 * Author:        Agner Fog
 * Date created:  2019-04-09
-* Last modified: 2026-09-04
+* Last modified: 2026-09-09
 * Version:       2.02.04
 * Project:       Testbench for vector class library
 * Description:
@@ -34,6 +34,8 @@
 *           8:  AVX2
 *           9:  AVX512F
 *           10: AVX512BW/DQ/VL
+*           11: AVX512VBMI and AVX512VBMI2
+*           12: AVX512_FP16
 *
 * Compile with any compiler supported by VCL.
 * Specify the desired instruction set and optimization options as parameters
