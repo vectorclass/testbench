@@ -4,7 +4,7 @@
 # ./runtest.sh test2.lst
 
 # choose compiler
-$compiler=3
+$compiler=1
 
 # maximum instruction set supported by this compiler
 $compilermax=11
@@ -361,7 +361,7 @@ $seed=1
 
 # lookup w. table
 6 , Vec16c Vec32c , , 3 8 9 10 , lookup ,
-6 , Vec8s Vec16s , , 3 8 9 10 , lookup ,
+6 , Vec8s Vec16s Vec32s , , 2 10 11 , lookup ,
 6 , Vec4i Vec8i Vec16i , , 3 8 9 10 , lookup ,
 6 , Vec4q Vec8q , , 3 8 9 10 , lookup ,
 6 , Vec4i , Vec4f , 3 8 9 10 , lookup ,

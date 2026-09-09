@@ -87,6 +87,7 @@ $testbench=/mnt/c/_Public/VectorClass/testbench2/testbench2.cpp
 
 6 , Vec8s  , Vec8h , 3 8 9 10 12 , lookup ,
 6 , Vec16s , Vec16h , 5 10 11 12 , lookup ,
+6 , Vec32s , Vec32h , 4 8 10 12  , lookup ,
 
 
 # *******************************************************************

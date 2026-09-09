@@ -4,7 +4,7 @@
 # ./runtest.sh test1.lst
 
 # choose compiler
-$compiler=3
+$compiler=1
 
 # maximum instruction set supported by this compiler
 $compilermax=11
